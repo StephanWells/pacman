@@ -5,50 +5,65 @@ using UnityEngine;
 public class PacmanController : MonoBehaviour
 {
     public float playerSpeed;
+    private Vector2 direction;
     Animator animator;
 
     void Start()
     {
+        direction = Vector2.zero;
         animator = this.GetComponent<Animator>();
     }
 
     void Update ()
     {
-		if (Input.GetKey(KeyCode.RightArrow))
-        {
-            transform.Translate(Vector2.right * playerSpeed);
+        CheckInput();
 
-            animator.SetBool("Right", true);
-            animator.SetBool("Left", false);
-            animator.SetBool("Up", false);
-            animator.SetBool("Down", false);
+        Move();
+    }
+
+    void CheckInput()
+    {
+        if (Input.GetKey(KeyCode.RightArrow))
+        {
+            //transform.Translate(Vector2.right * playerSpeed);
+            direction = Vector2.right;
+
+            SetState("Right");
         }
         else if (Input.GetKey(KeyCode.LeftArrow))
         {
-            transform.Translate(Vector2.left * playerSpeed);
+            //transform.Translate(Vector2.left * playerSpeed);
+            direction = Vector2.left;
 
-            animator.SetBool("Right", false);
-            animator.SetBool("Left", true);
-            animator.SetBool("Up", false);
-            animator.SetBool("Down", false);
+            SetState("Left");
         }
         else if (Input.GetKey(KeyCode.UpArrow))
         {
-            transform.Translate(Vector2.up * playerSpeed);
+            //transform.Translate(Vector2.up * playerSpeed);
+            direction = Vector2.up;
 
-            animator.SetBool("Right", false);
-            animator.SetBool("Left", false);
-            animator.SetBool("Up", true);
-            animator.SetBool("Down", false);
+            SetState("Up");
         }
         else if (Input.GetKey(KeyCode.DownArrow))
         {
-            transform.Translate(Vector2.down * playerSpeed);
+            //transform.Translate(Vector2.down * playerSpeed);
+            direction = Vector2.down;
 
-            animator.SetBool("Right", false);
-            animator.SetBool("Left", false);
-            animator.SetBool("Up", false);
-            animator.SetBool("Down", true);
+            SetState("Down");
         }
+    }
+
+    void Move()
+    {
+        transform.localPosition += (Vector3)(direction * playerSpeed) * Time.deltaTime;
+    }
+
+    void SetState(string state)
+    {
+        animator.SetBool("Right", false);
+        animator.SetBool("Left", false);
+        animator.SetBool("Up", false);
+        animator.SetBool("Down", false);
+        animator.SetBool(state, true);
     }
 }
