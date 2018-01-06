@@ -4,85 +4,59 @@ using UnityEngine;
 
 public class PacmanController : MonoBehaviour
 {
-    enum directions { RIGHT, UP, DOWN, LEFT, STATIONARY };
 
     public float playerSpeed;
     private Vector2 playerDirection;
     private Animator animator;
-    private directions directionState;
     public Node currentNode;
-    public Node nextNode;
 
     void Start()
     {
-        directionState = directions.STATIONARY;
         animator = this.GetComponent<Animator>();
-        nextNode = null;
+        Node node = GetNodeAtPosition(this.transform.localPosition);
+
+        if (node != null)
+        {
+            currentNode = node;
+            Debug.Log(currentNode);
+        }
+        else
+        {
+            Debug.Log("null!");
+        }
     }
 
     void Update()
     {
         CheckInput();
-        //CheckNodes();
-        ChangeDirection();
-        Move();
-    }
-
-    //void CheckNodes()
-    //{
-    //    if (this.transform.localPosition.Equals(nextNode.transform.localPosition))
-    //    {
-    //        currentNode = nextNode;
-    //    }
-    //}
-
-    void ChangeDirection()
-    {
-        switch (directionState)
-        {
-            case directions.RIGHT :
-                playerDirection = Vector2.right;
-                SetAnimatorState("Right");
-            break;
-
-            case directions.UP:
-                playerDirection = Vector2.up;
-                SetAnimatorState("Up");
-            break;
-
-            case directions.LEFT:
-                playerDirection = Vector2.left;
-                SetAnimatorState("Left");
-            break;
-
-            case directions.DOWN:
-                playerDirection = Vector2.down;
-                SetAnimatorState("Down");
-            break;
-
-            case directions.STATIONARY:
-                playerDirection = Vector2.zero;
-            break;
-        }
+        //Move();
     }
 
     void CheckInput()
     {
-        if (Input.GetKey(KeyCode.RightArrow))
+        if (Input.GetKeyDown(KeyCode.RightArrow))
         {
-            directionState = directions.RIGHT;
+            playerDirection = Vector2.right;
+            SetAnimatorState("Right");
+            MoveToNode(playerDirection);
         }
-        else if (Input.GetKey(KeyCode.UpArrow))
+        else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
-            directionState = directions.UP;
+            playerDirection = Vector2.up;
+            SetAnimatorState("Up");
+            MoveToNode(playerDirection);
         }
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
-            directionState = directions.LEFT;
+            playerDirection = Vector2.left;
+            SetAnimatorState("Left");
+            MoveToNode(playerDirection);
         }
-        else if (Input.GetKey(KeyCode.DownArrow))
+        else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
-            directionState = directions.DOWN;
+            playerDirection = Vector2.down;
+            SetAnimatorState("Down");
+            MoveToNode(playerDirection);
         }
     }
 
@@ -98,5 +72,49 @@ public class PacmanController : MonoBehaviour
         animator.SetBool("Up", false);
         animator.SetBool("Down", false);
         animator.SetBool(state, true);
+    }
+
+    void MoveToNode (Vector2 dir)
+    {
+        Node nextNode = CanMove(dir);
+        Debug.Log(nextNode);
+
+        if (nextNode != null)
+        {
+            transform.localPosition = nextNode.transform.position;
+            currentNode = nextNode;
+        }
+    }
+
+    Node CanMove (Vector2 dir)
+    {
+        Node nextNode = null;
+
+        for (int i = 0; i < currentNode.neighbouringNodes.Length; i++) // Go through the neighbours of our current node.
+        {
+            Debug.Log("Number of neighbouring nodes: " + currentNode.neighbouringNodes.Length);
+            if (currentNode.validDirections[i] == dir) // If the direction we want to go in is part of the valid directions (has a node where it can go to).
+            {
+                nextNode = currentNode.neighbouringNodes[i]; // Choose that node to go to.
+
+                break;
+            }
+        }
+
+        return nextNode;
+    }
+
+    Node GetNodeAtPosition (Vector2 pos)
+    {
+        int x = (int)((pos.x / 0.08) + 12.5f); // Each x unit in the game board is 0.08 Unity units across and starts at -1.
+        int y = (int)((pos.y / 0.08) + 14.0f); // Each y unit in the game board is 0.08 Unity units across and starts at -1.12.
+        GameObject tile = GameObject.Find("GameBoard").GetComponent<GameBoard>().board[x, y];
+
+        if (tile != null)
+        {
+            return tile.GetComponent<Node>();
+        }
+
+        return null;
     }
 }
