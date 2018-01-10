@@ -1,0 +1,11 @@
+{
+  "User": {
+    "id": 1626687,
+    "username": "StepW",
+    "name": "Stephan Wells",
+    "email": "stephanwells@hotmail.com",
+    "new_portrait": null,
+    "host": "https://gitlab.com/",
+    "two_factor_enabled": false
+  }
+}
