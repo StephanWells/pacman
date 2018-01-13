@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class PacmanController : MonoBehaviour
 {
-
     public float playerSpeed;
     private Vector2 playerDirection, nextDirection;
     private Animator animator;
@@ -182,16 +181,9 @@ public class PacmanController : MonoBehaviour
 
             if (tile != null)
             {
-                // Make the dot/pill at the current position disappear if it hasn't been eaten yet and if it actually is a dot/pill.
-                if (!tile.consumed && (tile.isDot || tile.isPowerPill))
-                {
-                    obj.GetComponent<SpriteRenderer>().enabled = false;
-                    tile.consumed = true;
-                }
+                obj.GetComponent<Tile>().consume();
             }
         }
-
-        
     }
 
     // Returns a node in the given direction if there is a valid one, otherwise returning null.
@@ -217,7 +209,7 @@ public class PacmanController : MonoBehaviour
     {
         GameBoard gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         Vector2Int board = gameBoard.WorldToBoard(pos);
-        GameObject tile = gameBoard.pills[board.x, board.y];
+        GameObject tile = gameBoard.pellets[board.x, board.y];
 
         if (tile != null)
         {
