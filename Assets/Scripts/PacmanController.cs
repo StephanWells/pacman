@@ -5,26 +5,22 @@ using UnityEngine;
 public class PacmanController : MonoBehaviour
 {
     public float playerSpeed;
-    private Vector2 playerDirection, nextDirection;
+    public Node startingPosition;
+
     private Animator animator;
-    public Node currentNode, previousNode, targetNode;
+    private Vector2 playerDirection, nextDirection;
+    private Node currentNode, previousNode, targetNode;
+    private GameBoard gameBoard;
 
     // Called when the game starts.
     void Start()
     {
         // Initialising values.
         animator = this.GetComponent<Animator>();
-        Node node = GetNodeAtPosition(this.transform.localPosition);
+        gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         playerDirection = Vector2.zero;
 
-        if (node != null)
-        {
-            currentNode = node;
-        }
-        else
-        {
-            Debug.Log("Error! Starting point has no node attached to it.");
-        }
+        currentNode = startingPosition;
     }
 
     // Called every tick.
@@ -91,7 +87,7 @@ public class PacmanController : MonoBehaviour
     {
         if (targetNode != currentNode && targetNode != null) // If the game thinks we have not yet reached our target node.
         {
-            if (Overshot()) // If we reached our target node.
+            if (gameBoard.Overshot(previousNode, targetNode, transform.localPosition)) // If we reached our target node.
             {
                 currentNode = targetNode; // Update the node information.
 
@@ -173,7 +169,7 @@ public class PacmanController : MonoBehaviour
     // Handles eating dots / power pills and removing them from screen.
     void ConsumePellet()
     {
-        GameObject obj = GetTileAtPosition(this.transform.position);
+        GameObject obj = gameBoard.GetTileAtPosition(this.transform.position);
 
         if (obj != null)
         {
@@ -202,52 +198,5 @@ public class PacmanController : MonoBehaviour
         }
 
         return nextNode;
-    }
-
-    // Returns the pill object at a given position on the game board.
-    GameObject GetTileAtPosition(Vector2 pos)
-    {
-        GameBoard gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
-        Vector2Int board = gameBoard.WorldToBoard(pos);
-        GameObject tile = gameBoard.pellets[board.x, board.y];
-
-        if (tile != null)
-        {
-            return tile;
-        }
-
-        return null;
-    }
-
-    // Returns the node at a given position on the game board.
-    Node GetNodeAtPosition(Vector2 pos)
-    {
-        GameBoard gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
-        Vector2Int board = gameBoard.WorldToBoard(pos);
-        GameObject tile = gameBoard.nodes[board.x, board.y];
-
-        if (tile != null)
-        {
-            return tile.GetComponent<Node>();
-        }
-
-        return null;
-    }
-
-    // Checks if Pacman can go further or not based on its current position.
-    bool Overshot()
-    {
-        float nodeToTarget = LengthFromNode(targetNode.transform.position);
-        float nodeToSelf = LengthFromNode(transform.localPosition);
-
-        return nodeToSelf >= nodeToTarget;
-    }
-
-    // Returns the length from the previous node to the target coordinates parameter.
-    float LengthFromNode(Vector2 targetPos)
-    {
-        Vector2 vec = targetPos - (Vector2)previousNode.transform.position;
-
-        return vec.sqrMagnitude;
     }
 }

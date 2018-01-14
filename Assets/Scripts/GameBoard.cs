@@ -49,9 +49,58 @@ public class GameBoard : MonoBehaviour
 
         return board;
     }
-	
-	void Update ()
+
+    // Returns the pill object at a given position on the game board.
+    public GameObject GetTileAtPosition(Vector2 pos)
     {
-		
-	}
+        Vector2Int board = WorldToBoard(pos);
+        GameObject tile = pellets[board.x, board.y];
+
+        if (tile != null)
+        {
+            return tile;
+        }
+
+        return null;
+    }
+
+    // Returns the node at a given position on the game board.
+    public Node GetNodeAtPosition(Vector2 pos)
+    {
+        Vector2Int board = WorldToBoard(pos);
+        GameObject tile = nodes[board.x, board.y];
+
+        if (tile != null)
+        {
+            return tile.GetComponent<Node>();
+        }
+
+        return null;
+    }
+
+    // Returns the length from a node to the coordinates parameter.
+    public float LengthFromNode(Node node, Vector2 pos)
+    {
+        Vector2 vec = pos - (Vector2)node.transform.position;
+
+        return vec.sqrMagnitude;
+    }
+
+    // Checks if an entity can go further or not based on its previous and target node, and its current position.
+    public bool Overshot(Node previous, Node target, Vector2 currentPos)
+    {
+        float nodeToTarget = LengthFromNode(previous, target.transform.position);
+        float nodeToSelf = LengthFromNode(previous, currentPos);
+
+        return nodeToSelf >= nodeToTarget;
+    }
+
+    // Returns the squared distance between two points.
+    public float GetSquaredDistance (Vector2 posA, Vector2 posB)
+    {
+        float dx = posA.x - posB.x;
+        float dy = posA.y - posB.y;
+
+        return /*Mathf.Sqrt(*/dx * dx + dy * dy/*)*/;
+    }
 }
