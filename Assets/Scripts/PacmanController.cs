@@ -6,9 +6,11 @@ public class PacmanController : MonoBehaviour
 {
     public float playerSpeed;
     public Node startingPosition;
+    public Vector2 playerDirection;
 
-    private Animator animator;
-    private Vector2 playerDirection, nextDirection;
+    private AnimationController.State playerState;
+    private AnimationController animator;
+    private Vector2 nextDirection;
     private Node currentNode, previousNode, targetNode;
     private GameBoard gameBoard;
 
@@ -16,11 +18,12 @@ public class PacmanController : MonoBehaviour
     void Start()
     {
         // Initialising values.
-        animator = this.GetComponent<Animator>();
+        animator = this.GetComponent<AnimationController>();
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
-        playerDirection = Vector2.zero;
-
+        playerDirection = Vector2.right;
+        playerState = AnimationController.State.MOVING;
         currentNode = startingPosition;
+        ChangePosition(playerDirection);
     }
 
     // Called every tick.
@@ -37,18 +40,22 @@ public class PacmanController : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.RightArrow))
         {
             ChangePosition(Vector2.right);
+            playerState = AnimationController.State.MOVING;
         }
         else if (Input.GetKeyDown(KeyCode.UpArrow))
         {
             ChangePosition(Vector2.up);
+            playerState = AnimationController.State.MOVING;
         }
         else if (Input.GetKeyDown(KeyCode.LeftArrow))
         {
             ChangePosition(Vector2.left);
+            playerState = AnimationController.State.MOVING;
         }
         else if (Input.GetKeyDown(KeyCode.DownArrow))
         {
             ChangePosition(Vector2.down);
+            playerState = AnimationController.State.MOVING;
         }
     }
 
@@ -70,7 +77,7 @@ public class PacmanController : MonoBehaviour
         if (currentNode != null) // If we're on a node.
         {
             Node moveToNode = CanMove(dir);
-
+            
             if (moveToNode != null) // If it's valid.
             {
                 // Update the direction and nodes.
@@ -123,46 +130,16 @@ public class PacmanController : MonoBehaviour
                 }
                 else
                 {
-                    playerDirection = Vector2.zero;
+                    playerState = AnimationController.State.STILL;
                 }
             }
             else
             {
-                transform.localPosition += (Vector3)(playerDirection * playerSpeed) * Time.deltaTime; // Move Pacman.
+                transform.localPosition += (Vector3)(playerDirection * playerSpeed) * Time.deltaTime * (playerState == AnimationController.State.STILL ? 0.0f : 1.0f); // Move Pacman.
             }
 
-            SetAnimatorState(playerDirection);
-        }
-    }
-
-    // Updates the animation Pacman's currently on based on the direction parameter.
-    void SetAnimatorState(Vector2 state)
-    {
-        animator.SetBool("Right", false);
-        animator.SetBool("Left", false);
-        animator.SetBool("Up", false);
-        animator.SetBool("Down", false);
-        animator.SetBool("Idle", false);
-
-        if (state == Vector2.right)
-        {
-            animator.SetBool("Right", true);
-        }
-        else if (state == Vector2.left)
-        {
-            animator.SetBool("Left", true);
-        }
-        else if (state == Vector2.up)
-        {
-            animator.SetBool("Up", true);
-        }
-        else if (state == Vector2.down)
-        {
-            animator.SetBool("Down", true);
-        }
-        else if (state == Vector2.zero)
-        {
-            animator.SetBool("Idle", true);
+            animator.SetAnimatorDirection(playerDirection);
+            animator.SetAnimatorState(playerState);
         }
     }
 

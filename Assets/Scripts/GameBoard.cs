@@ -50,6 +50,20 @@ public class GameBoard : MonoBehaviour
         return board;
     }
 
+    // Translates board coordinates to coordinates in the unity world.
+    public Vector2 BoardToWorld(Vector2 coord)
+    {
+        Vector2 world = new Vector2Int();
+        float xf, yf;
+
+        xf = (coord.x - 12.5f) / 12.5f; // Each x unit in the game board is 0.08 Unity units across and starts at -1.
+        yf = (coord.y - 14.0f) / 12.5f; // Each y unit in the game board is 0.08 Unity units across and starts at -1.12.
+
+        world = new Vector2(xf, yf);
+
+        return world;
+    }
+
     // Returns the pill object at a given position on the game board.
     public GameObject GetTileAtPosition(Vector2 pos)
     {

@@ -2,26 +2,29 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Ghost : MonoBehaviour
+public class GhostController : MonoBehaviour
 {
-    enum Mode { SCATTER, CHASE, FRIGHTENED };
+    public enum Mode { SCATTER, CHASE, FRIGHTENED, IDLE };
+    public enum Ghost { BLINKY, PINKY, INKY, CLYDE };
 
     public float ghostSpeed = 0.4f;
     public Node startingPosition;
+    public Node homeNode;
 
-    private int[] timers = { 7, 20, 7, 20, 5, 20, 5};
-    private Mode[] modes = { Mode.SCATTER, Mode.CHASE, Mode.SCATTER, Mode.CHASE, Mode.SCATTER, Mode.CHASE, Mode.SCATTER, Mode.CHASE };
+    public int[] timers = new int[8];
+    public Mode[] modes = new Mode[8];
+    public Ghost ghost;
 
     private int stateIteration = 0;
     private float modeChangeTimer = 0;
+    private AnimationController.State ghostState;
 
     Mode currentMode;
-    Mode previousMode;
 
     private GameObject pacMan;
     private GameBoard gameBoard;
+    private AnimationController animator;
 
-    private Animator animator;
     private Vector2 ghostDirection, nextDirection;
     private Node currentNode, previousNode, targetNode;
 
@@ -29,8 +32,9 @@ public class Ghost : MonoBehaviour
     {
         pacMan = GameObject.Find("Pacman");
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
-        animator = this.GetComponent<Animator>();
-        currentMode = Mode.SCATTER;
+        animator = this.GetComponent<AnimationController>();
+        currentMode = Mode.IDLE;
+        ghostState = AnimationController.State.STILL;
 
         currentNode = startingPosition;
         previousNode = currentNode;
@@ -68,16 +72,112 @@ public class Ghost : MonoBehaviour
             }
             else
             {
-                transform.localPosition += (Vector3)ghostDirection * ghostSpeed * Time.deltaTime;
+                transform.localPosition += (Vector3)(ghostDirection * ghostSpeed) * Time.deltaTime * (currentMode == Mode.IDLE ? 0.0f : 1.0f);
             }
         }
+
+        animator.SetAnimatorDirection(ghostDirection);
+        animator.SetAnimatorState(ghostState);
+    }
+
+    // Blinky follows Pacman.
+    Vector2 GetBlinkyChaseTile()
+    {
+        Vector2 pacmanPosition = pacMan.transform.position;
+        Vector2 targetTile = gameBoard.WorldToBoard(pacmanPosition);
+
+        return targetTile;
+    }
+
+    // Pinky goes four tiles ahead of Pacman.
+    Vector2 GetPinkyChaseTile()
+    {
+        Vector2 pacmanPosition = pacMan.transform.position;
+        Vector2 pacmanDirection = pacMan.GetComponent<PacmanController>().playerDirection;
+        Vector2 targetTile = gameBoard.WorldToBoard(pacmanPosition) + 4 * pacmanDirection;
+
+        return targetTile;
+    }
+
+    // Inky
+    Vector2 GetInkyChaseTile()
+    {
+        Vector2 targetTile = gameBoard.WorldToBoard(this.transform.position);
+
+        return targetTile;
+    }
+
+    // Clyde
+    Vector2 GetClydeChaseTile()
+    {
+        Vector2 targetTile = gameBoard.WorldToBoard(this.transform.position);
+
+        return targetTile;
+    }
+
+    public Vector2 GetTargetTile()
+    {
+        Vector2 targetTile = Vector2.zero;
+
+        switch (currentMode)
+        {
+            case Mode.SCATTER:
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        targetTile = GetBlinkyChaseTile();
+                    break;
+
+                    case Ghost.PINKY:
+                        targetTile = GetPinkyChaseTile();
+                    break;
+
+                    case Ghost.INKY:
+                        targetTile = GetInkyChaseTile();
+                    break;
+
+                    case Ghost.CLYDE:
+                        targetTile = GetClydeChaseTile();
+                    break;
+                }
+                break;
+
+            case Mode.CHASE:
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        targetTile = GetBlinkyChaseTile();
+                    break;
+
+                    case Ghost.PINKY:
+                        targetTile = GetPinkyChaseTile();
+                    break;
+
+                    case Ghost.INKY:
+                        targetTile = GetInkyChaseTile();
+                    break;
+
+                    case Ghost.CLYDE:
+                        targetTile = GetClydeChaseTile();
+                    break;
+                }
+            break;
+
+            case Mode.FRIGHTENED:
+
+            break;
+
+            case Mode.IDLE:
+                targetTile = gameBoard.WorldToBoard(this.transform.position);
+            break;
+        }
+
+        return targetTile;
     }
 
     Node ChooseNextNode()
     {
-        Vector2 pacmanPosition = pacMan.transform.position;
-        Vector2 targetTile = gameBoard.WorldToBoard(pacmanPosition);
-        Debug.Log(gameBoard.WorldToBoard(pacmanPosition));
+        Vector2 targetTile = GetTargetTile();
         Node moveToNode = null;
 
         List<Node> foundNodes = new List<Node>();
@@ -123,9 +223,14 @@ public class Ghost : MonoBehaviour
         {
             modeChangeTimer += Time.deltaTime;
 
-            if (stateIteration == 7)
+            if (stateIteration == 1)
             {
-                ChangeMode(modes[7]);
+                ghostState = AnimationController.State.MOVING;
+            }
+
+            if (stateIteration == timers.Length)
+            {
+                ChangeMode(modes[timers.Length]);
             }
             else
             {
@@ -141,7 +246,6 @@ public class Ghost : MonoBehaviour
 
     void ChangeMode(Mode mode)
     {
-        previousMode = currentMode;
         currentMode = mode;
     }
 }
