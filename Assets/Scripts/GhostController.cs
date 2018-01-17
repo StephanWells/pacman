@@ -4,10 +4,13 @@ using UnityEngine;
 
 public class GhostController : MonoBehaviour
 {
-    public enum Mode { SCATTER, CHASE, FRIGHTENED, IDLE };
+    public enum Mode { SCATTER, CHASE, FRIGHTENED, RECOVERY, IDLE };
     public enum Ghost { BLINKY, PINKY, INKY, CLYDE };
+    private const float frightenedTime = 10f;
+    private const float frightenedSlow = 0.5f;
 
     public float ghostSpeed = 0.4f;
+    public float frightenedFactor = 1f;
     public Node startingPosition;
     public Node homeNode;
 
@@ -17,25 +20,27 @@ public class GhostController : MonoBehaviour
 
     private int stateIteration = 0;
     private float modeChangeTimer = 0;
+    private float frightenedTimer = 0;
     private AnimationController.State ghostState;
+    private GameObject ghostHouseEntrance;
+    private GameObject ghostHouse;
 
-    Mode currentMode;
+    Mode currentMode, previousMode;
 
     private GameObject pacMan;
-    private GameObject blinky, pinky, inky, clyde;
+    private GameObject blinky;
     private GameBoard gameBoard;
     private AnimationController animator;
 
     private Vector2 ghostDirection, nextDirection;
     private Node currentNode, previousNode, targetNode;
 
-    void Start ()
+    void Start()
     {
         pacMan = GameObject.Find("Pacman");
         blinky = GameObject.Find("Blinky");
-        pinky = GameObject.Find("Pinky");
-        inky = GameObject.Find("Inky");
-        clyde = GameObject.Find("Clyde");
+        ghostHouseEntrance = GameObject.Find("StartNodeBlinky");
+        ghostHouse = GameObject.Find("StartNodePinky");
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         animator = this.GetComponent<AnimationController>();
         currentMode = Mode.IDLE;
@@ -46,7 +51,7 @@ public class GhostController : MonoBehaviour
         targetNode = ChooseNextNode();
     }
 
-	void Update ()
+	void Update()
     {
         ModeUpdate();
         Move();
@@ -77,12 +82,71 @@ public class GhostController : MonoBehaviour
             }
             else
             {
-                transform.localPosition += (Vector3)(ghostDirection * ghostSpeed) * Time.deltaTime * (currentMode == Mode.IDLE ? 0.0f : 1.0f);
+                transform.localPosition += (Vector3)(ghostDirection * ghostSpeed) * Time.deltaTime * (currentMode == Mode.IDLE ? 0.0f : 1.0f) * frightenedFactor;
             }
         }
 
         animator.SetAnimatorDirection(ghostDirection);
         animator.SetAnimatorState(ghostState);
+    }
+
+    Node ChooseNextNode()
+    {
+        Vector2 targetTile = GetTargetTile();
+        Node moveToNode = null;
+
+        List<Node> foundNodes = new List<Node>();
+        List<Vector2> foundNodeDirections = new List<Vector2>();
+
+        if (ghost == Ghost.BLINKY)
+        {
+            Debug.Log("ChooseNextNode currentnode: " + currentNode);
+            Debug.Log("ChooseNextNode previousnode: " + previousNode);
+            Debug.Log("ChooseNextNode ghosthousebool: " + isInGhostHouse());
+            Debug.Log(currentNode.name);
+        }
+        
+        for (int i = 0; i < currentNode.neighbouringNodes.Length; i++)
+        {
+            Vector2 tempDir = currentNode.validDirections[i];
+            Node tempNode = currentNode.neighbouringNodes[i];
+            bool isValidDirection = tempDir != ghostDirection * -1;
+
+            if ((isValidDirection && !tempNode.isGhostNode) || (isValidDirection && currentMode == Mode.RECOVERY) || (isInGhostHouse()))
+            {
+                foundNodes.Add(tempNode);
+                foundNodeDirections.Add(tempDir);
+            }
+        }
+
+        if (ghost == Ghost.BLINKY)
+        {
+            Debug.Log("ChooseNextNode nodecount: " + foundNodes.Count);
+        }
+
+        if (foundNodes.Count == 1)
+        {
+            moveToNode = foundNodes[0];
+            ghostDirection = foundNodeDirections[0];
+        }
+        else if (foundNodes.Count >= 1)
+        {
+            float leastDistance = float.MaxValue;
+
+            for (int i = 0; i < foundNodes.Count; i++)
+            {
+                float distance = gameBoard.GetSquaredDistance(gameBoard.WorldToBoard(foundNodes[i].transform.position), targetTile);
+
+                if (distance < leastDistance)
+                {
+                    leastDistance = distance;
+                    moveToNode = foundNodes[i];
+                    ghostDirection = foundNodeDirections[i];
+                }
+            }
+        }
+
+        return moveToNode;
     }
 
     // Blinky follows Pacman.
@@ -174,7 +238,12 @@ public class GhostController : MonoBehaviour
             break;
 
             case Mode.FRIGHTENED:
+                targetTile = GetGhostScatterTile();
+                CheckCollision();
+            break;
 
+            case Mode.RECOVERY:
+                targetTile = gameBoard.WorldToBoard(ghostHouse.transform.position);
             break;
 
             case Mode.IDLE:
@@ -185,51 +254,25 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
-    Node ChooseNextNode()
+    void CheckCollision()
     {
-        Vector2 targetTile = GetTargetTile();
-        Node moveToNode = null;
+        Rect ghostRect = new Rect(this.transform.position, this.transform.GetComponent<SpriteRenderer>().sprite.bounds.size / 4);
+        Rect pacmanRect = new Rect(pacMan.transform.position, pacMan.transform.GetComponent<SpriteRenderer>().sprite.bounds.size / 4);
 
-        List<Node> foundNodes = new List<Node>();
-        List<Vector2> foundNodeDirections = new List<Vector2>();
-
-        for (int i = 0; i < currentNode.neighbouringNodes.Length; i++)
+        if (ghostRect.Overlaps(pacmanRect))
         {
-            if (currentNode.validDirections[i] != ghostDirection * -1)
-            {
-                foundNodes.Add(currentNode.neighbouringNodes[i]);
-                foundNodeDirections.Add(currentNode.validDirections[i]);
-            }
+            enterRecoveryMode();
         }
-
-        if (foundNodes.Count == 1)
-        {
-            moveToNode = foundNodes[0];
-            ghostDirection = foundNodeDirections[0];
-        }
-        else if (foundNodes.Count >= 1)
-        {
-            float leastDistance = float.MaxValue;
-
-            for (int i = 0; i < foundNodes.Count; i++)
-            {
-                float distance = gameBoard.GetSquaredDistance(gameBoard.WorldToBoard(foundNodes[i].transform.position), targetTile);
-
-                if (distance < leastDistance)
-                {
-                    leastDistance = distance;
-                    moveToNode = foundNodes[i];
-                    ghostDirection = foundNodeDirections[i];
-                }
-            }
-        }
-
-        return moveToNode;
     }
 
     void ModeUpdate()
     {
-        if (currentMode != Mode.FRIGHTENED)
+        //if (ghost == Ghost.BLINKY)
+        //{
+        //    Debug.Log("Current node: " + currentNode + ". Previous node: " + previousNode + ". Target node: " + targetNode + ". Current mode: " + currentMode + ".");
+        //}
+
+        if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY)
         {
             modeChangeTimer += Time.deltaTime;
 
@@ -252,10 +295,98 @@ public class GhostController : MonoBehaviour
                 }
             }
         }
+        else if (currentMode == Mode.FRIGHTENED)
+        {
+            frightenedTimer += Time.deltaTime;
+
+            if (frightenedTimer >= frightenedTime * 0.7 && ghostState == AnimationController.State.FRIGHTENED)
+            {
+                enterFrightened2Mode();
+            }
+
+            if (frightenedTimer >= frightenedTime)
+            {
+                exitFrightenedMode();
+            }
+        }
+        else
+        {
+            if (previousNode == ghostHouse.GetComponent<Node>())
+            {
+                exitRecoveryMode();
+            }
+        }
     }
 
     void ChangeMode(Mode mode)
     {
+        if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY)
+        {
+            previousMode = currentMode;
+        }
+        
         currentMode = mode;
+    }
+
+    public void enterFrightenedMode()
+    {
+        if (currentMode != Mode.IDLE && currentMode != Mode.RECOVERY)
+        {
+            frightenedTimer = 0;
+            ChangeMode(Mode.FRIGHTENED);
+            ghostState = AnimationController.State.FRIGHTENED;
+            frightenedFactor = frightenedSlow;
+            reverseDirection();
+        }
+    }
+
+    public void enterFrightened2Mode()
+    {
+        ghostState = AnimationController.State.FRIGHTENED2;
+    }
+
+    public void enterRecoveryMode()
+    {
+        ChangeMode(Mode.RECOVERY);
+        ghostState = AnimationController.State.RECOVERY;
+        frightenedFactor = 1f;
+    }
+
+    void exitFrightenedMode()
+    {
+        ChangeMode(previousMode);
+        ghostState = AnimationController.State.RECOVERED;
+        frightenedFactor = 1f;
+    }
+
+    void exitRecoveryMode()
+    {
+        modeChangeTimer = 0;
+        stateIteration = 1;
+        ChangeMode(modes[stateIteration]);
+        ghostState = AnimationController.State.RECOVERED;
+    }
+
+    bool isInGhostHouse()
+    {
+        return currentNode.name.Equals("StartNodePinky") || currentNode.name.Equals("StartNodeInky") || currentNode.name.Equals("StartNodeClyde");
+    }
+
+    bool isLeavingInGhostHouse()
+    {
+        return previousNode.name.Equals("StartNodePinky") || previousNode.name.Equals("StartNodeInky") || previousNode.name.Equals("StartNodeClyde");
+    }
+
+    void reverseDirection()
+    {
+        if (!isLeavingInGhostHouse())
+        {
+            ghostDirection *= -1;
+
+            Node temp = targetNode;
+            targetNode = previousNode;
+            previousNode = temp;
+            currentNode = null;
+        }
     }
 }

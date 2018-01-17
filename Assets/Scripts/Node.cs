@@ -6,8 +6,9 @@ public class Node : MonoBehaviour
 {
     public Node[] neighbouringNodes; // All the neighbouring nodes that Pacman can go to.
     public Vector2[] validDirections; // All the directions Pacman can choose from at the current node.
+    public bool isGhostNode;
 
-	void Start ()
+    void Start ()
     {
         validDirections = new Vector2[neighbouringNodes.Length];
 

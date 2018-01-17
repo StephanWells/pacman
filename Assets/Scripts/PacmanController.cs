@@ -11,6 +11,7 @@ public class PacmanController : MonoBehaviour
     private AnimationController.State playerState;
     private AnimationController animator;
     private Vector2 nextDirection;
+    private GameObject[] ghosts = new GameObject[4];
     private Node currentNode, previousNode, targetNode;
     private GameBoard gameBoard;
 
@@ -20,6 +21,12 @@ public class PacmanController : MonoBehaviour
         // Initialising values.
         animator = this.GetComponent<AnimationController>();
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
+        
+        ghosts[0] = GameObject.Find("Blinky");
+        ghosts[1] = GameObject.Find("Pinky");
+        ghosts[2] = GameObject.Find("Inky");
+        ghosts[3] = GameObject.Find("Clyde");
+
         playerDirection = Vector2.right;
         playerState = AnimationController.State.MOVING;
         currentNode = startingPosition;
@@ -154,6 +161,14 @@ public class PacmanController : MonoBehaviour
 
             if (tile != null)
             {
+                if (tile.isPowerPill && !tile.consumed)
+                {
+                    for (int i = 0; i < ghosts.Length; i++)
+                    {
+                        ghosts[i].GetComponent<GhostController>().enterFrightenedMode();
+                    }
+                }
+
                 obj.GetComponent<Tile>().consume();
             }
         }
@@ -166,7 +181,7 @@ public class PacmanController : MonoBehaviour
 
         for (int i = 0; i < currentNode.neighbouringNodes.Length; i++) // Go through the neighbours of our current node.
         {
-            if (currentNode.validDirections[i] == dir) // If the direction we want to go in is part of the valid directions (has a node where it can go to).
+            if (currentNode.validDirections[i] == dir && !currentNode.neighbouringNodes[i].isGhostNode) // If the direction we want to go in is part of the valid directions (has a node where it can go to).
             {
                 nextNode = currentNode.neighbouringNodes[i]; // Choose that node to go to.
 
