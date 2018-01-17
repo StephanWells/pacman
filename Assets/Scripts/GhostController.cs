@@ -22,6 +22,7 @@ public class GhostController : MonoBehaviour
     Mode currentMode;
 
     private GameObject pacMan;
+    private GameObject blinky, pinky, inky, clyde;
     private GameBoard gameBoard;
     private AnimationController animator;
 
@@ -31,6 +32,10 @@ public class GhostController : MonoBehaviour
     void Start ()
     {
         pacMan = GameObject.Find("Pacman");
+        blinky = GameObject.Find("Blinky");
+        pinky = GameObject.Find("Pinky");
+        inky = GameObject.Find("Inky");
+        clyde = GameObject.Find("Clyde");
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         animator = this.GetComponent<AnimationController>();
         currentMode = Mode.IDLE;
@@ -99,20 +104,42 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
-    // Inky
+    // Inky considers the tile two tiles ahead of Pacman, then draws a direction vector from it to Blinky, doubles that vector, and chooses the tile that the vector lands at.
     Vector2 GetInkyChaseTile()
     {
-        Vector2 targetTile = gameBoard.WorldToBoard(this.transform.position);
+        Vector2 pacmanPosition = pacMan.transform.position;
+        Vector2 pacmanDirection = pacMan.GetComponent<PacmanController>().playerDirection;
+        Vector2 pacmanTile = gameBoard.WorldToBoard(pacmanPosition) + 2 * pacmanDirection;
+        Vector2 blinkyPos = gameBoard.WorldToBoard(blinky.transform.position);
+        Vector2 blinkyPacman = (pacmanTile - blinkyPos) * 2;
+        Vector2 targetTile = blinkyPos + blinkyPacman;
 
         return targetTile;
     }
 
-    // Clyde
+    // Clyde chases Pacman Blinky-style if he's fewer than 8 units away from him, or runs to his home node if he's over 8 unites away from him.
     Vector2 GetClydeChaseTile()
     {
-        Vector2 targetTile = gameBoard.WorldToBoard(this.transform.position);
+        Vector2 pacmanPosition = gameBoard.WorldToBoard(pacMan.transform.position);
+        Vector2 ghostPosition = gameBoard.WorldToBoard(this.transform.position);
+        float distance = gameBoard.GetSquaredDistance(pacmanPosition, ghostPosition);
+        Vector2 targetTile = Vector2.zero;
+
+        if (distance <= 64f)
+        {
+            targetTile = pacmanPosition;
+        }
+        else
+        {
+            targetTile = gameBoard.WorldToBoard(homeNode.transform.position);
+        }
 
         return targetTile;
+    }
+
+    Vector2 GetGhostScatterTile()
+    {
+        return gameBoard.WorldToBoard(homeNode.transform.position);
     }
 
     public Vector2 GetTargetTile()
@@ -122,25 +149,8 @@ public class GhostController : MonoBehaviour
         switch (currentMode)
         {
             case Mode.SCATTER:
-                switch (ghost)
-                {
-                    case Ghost.BLINKY:
-                        targetTile = GetBlinkyChaseTile();
-                    break;
-
-                    case Ghost.PINKY:
-                        targetTile = GetPinkyChaseTile();
-                    break;
-
-                    case Ghost.INKY:
-                        targetTile = GetInkyChaseTile();
-                    break;
-
-                    case Ghost.CLYDE:
-                        targetTile = GetClydeChaseTile();
-                    break;
-                }
-                break;
+                targetTile = GetGhostScatterTile();
+            break;
 
             case Mode.CHASE:
                 switch (ghost)
