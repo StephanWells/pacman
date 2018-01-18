@@ -9,8 +9,10 @@ public class GameBoard : MonoBehaviour
     public int totalPellets = 0;
     public int pelletsConsumed = 0;
     public int score = 0;
+    public int pacmanLives = 3;
     public GameObject[,] pellets = new GameObject[boardWidth, boardHeight]; // Locations of the dots and power pills.
     public GameObject[,] nodes = new GameObject[boardWidth, boardHeight]; // Locations of the back-end movement nodes/waypoints.
+    bool startDeath = false;
 
 	void Start ()
     {
@@ -34,6 +36,79 @@ public class GameBoard : MonoBehaviour
             }
         }
 	}
+
+    public void Restart()
+    {
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<PacmanController>().Restart();
+        pacMan.GetComponent<SpriteRenderer>().enabled = true;
+        pacmanLives--;
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<GhostController>().Restart();
+            ghost.GetComponent<SpriteRenderer>().enabled = true;
+        }
+    }
+
+    public void StartDeath()
+    {
+        if (!startDeath)
+        {
+            startDeath = true;
+        }
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<GhostController>().canMove = false;
+        }
+
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<PacmanController>().canMove = false;
+        pacMan.transform.GetComponent<Animator>().enabled = false;
+
+        StartCoroutine(ProcessDeathAfter(1.0f));
+    }
+
+    IEnumerator ProcessDeathAfter (float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+        StartCoroutine(ProcessDeathAnimation(2.1f));
+    }
+
+    IEnumerator ProcessDeathAnimation(float delay)
+    {
+        GameObject pacMan = GameObject.Find("Pacman");
+
+        pacMan.transform.GetComponent<Animator>().enabled = true;
+        pacMan.GetComponent<AnimationController>().SetAnimatorState(AnimationController.State.DEAD);
+
+        yield return new WaitForSeconds(delay);
+
+        StartCoroutine(ProcessStart(1.5f));
+    }
+
+    IEnumerator ProcessStart(float delay)
+    {
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<SpriteRenderer>().enabled = false;
+
+        yield return new WaitForSeconds(delay);
+
+        Restart();
+    }
 
     // Translates unity coordinates to coordinates on the game board.
     public Vector2Int WorldToBoard(Vector2 coord)

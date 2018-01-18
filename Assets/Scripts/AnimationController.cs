@@ -5,7 +5,7 @@ using UnityEngine;
 public class AnimationController : MonoBehaviour
 {
     private Animator animator;
-    public enum State { MOVING, STILL, FRIGHTENED, FRIGHTENED2, RECOVERY, RECOVERED };
+    public enum State { MOVING, STILL, FRIGHTENED, FRIGHTENED2, RECOVERY, RECOVERED, DEAD, ALIVE };
 
     void Start ()
     {
@@ -77,6 +77,14 @@ public class AnimationController : MonoBehaviour
             animator.SetBool("Frightened 2", false);
             animator.SetBool("Recovery", false);
             state = State.MOVING;
+        }
+        else if (state == State.DEAD)
+        {
+            animator.SetBool("Dead", true);
+        }
+        else if (state == State.ALIVE)
+        {
+            animator.SetBool("Dead", false);
         }
     }
 

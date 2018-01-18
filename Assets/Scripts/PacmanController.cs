@@ -5,6 +5,9 @@ using UnityEngine;
 public class PacmanController : MonoBehaviour
 {
     public float playerSpeed;
+
+    public bool canMove = true;
+
     public Node startingPosition;
     public Vector2 playerDirection;
 
@@ -33,12 +36,28 @@ public class PacmanController : MonoBehaviour
         ChangePosition(playerDirection);
     }
 
+    public void Restart()
+    {
+        this.transform.position = startingPosition.transform.position;
+        playerDirection = Vector2.right;
+        nextDirection = Vector2.right;
+        playerState = AnimationController.State.ALIVE;
+        playerState = AnimationController.State.MOVING;
+        currentNode = startingPosition;
+        ChangePosition(playerDirection);
+
+        canMove = true;
+    }
+
     // Called every tick.
     void Update()
     {
-        CheckInput();
-        Move();
-        ConsumePellet();
+        if (canMove)
+        {
+            CheckInput();
+            Move();
+            ConsumePellet();
+        }
     }
 
     // Handles player input (arrow keys).

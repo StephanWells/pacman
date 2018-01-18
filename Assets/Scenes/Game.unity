@@ -2993,7 +2993,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &268792556
 Transform:
   m_ObjectHideFlags: 0
@@ -10587,6 +10587,7 @@ MonoBehaviour:
   totalPellets: 0
   pelletsConsumed: 0
   score: 0
+  pacmanLives: 3
 --- !u!4 &967784750
 Transform:
   m_ObjectHideFlags: 0
@@ -12424,7 +12425,7 @@ GameObject:
   - component: {fileID: 1178232263}
   m_Layer: 0
   m_Name: Inky
-  m_TagString: Untagged
+  m_TagString: Ghost
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -12514,13 +12515,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea54757bb2f637645b5f3c374af43c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ghostSpeed: 0.4
-  frightenedFactor: 1
+  canMove: 1
   startingPosition: {fileID: 1649504993}
   homeNode: {fileID: 701523247}
   timers: 0400000007000000140000000700000014000000050000001400000005000000
   modes: 040000000000000001000000000000000100000000000000010000000000000001000000
   ghost: 2
+  frightenedFactor: 1
 --- !u!114 &1178232263
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -12981,7 +12982,7 @@ GameObject:
   - component: {fileID: 1216126380}
   m_Layer: 0
   m_Name: Clyde
-  m_TagString: Untagged
+  m_TagString: Ghost
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -13071,13 +13072,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea54757bb2f637645b5f3c374af43c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ghostSpeed: 0.4
-  frightenedFactor: 1
+  canMove: 1
   startingPosition: {fileID: 458820510}
   homeNode: {fileID: 2588268}
   timers: 0800000007000000140000000700000014000000050000001400000005000000
   modes: 040000000000000001000000000000000100000000000000010000000000000001000000
   ghost: 3
+  frightenedFactor: 1
 --- !u!114 &1216126380
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -17626,7 +17627,7 @@ GameObject:
   - component: {fileID: 1652734916}
   m_Layer: 0
   m_Name: Pinky
-  m_TagString: Untagged
+  m_TagString: Ghost
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17716,13 +17717,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea54757bb2f637645b5f3c374af43c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ghostSpeed: 0.4
-  frightenedFactor: 1
+  canMove: 1
   startingPosition: {fileID: 2080326253}
   homeNode: {fileID: 2046881835}
   timers: 0000000007000000140000000700000014000000050000001400000005000000
   modes: 040000000000000001000000000000000100000000000000010000000000000001000000
   ghost: 1
+  frightenedFactor: 1
 --- !u!114 &1652734916
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20012,7 +20013,7 @@ GameObject:
   - component: {fileID: 1911199328}
   m_Layer: 0
   m_Name: Blinky
-  m_TagString: Untagged
+  m_TagString: Ghost
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -20102,13 +20103,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ea54757bb2f637645b5f3c374af43c4b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  ghostSpeed: 0.4
-  frightenedFactor: 1
+  canMove: 1
   startingPosition: {fileID: 1353133924}
   homeNode: {fileID: 231844478}
   timers: 0000000007000000140000000700000014000000050000001400000005000000
   modes: 040000000000000001000000000000000100000000000000010000000000000001000000
   ghost: 0
+  frightenedFactor: 1
 --- !u!114 &1911199328
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20699,7 +20700,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 2
   m_Sprite: {fileID: 21300012, guid: 103dc84690c60ad4e9e891f948377d29, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -20752,6 +20753,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   playerSpeed: 0.45
+  canMove: 1
   startingPosition: {fileID: 707596155}
   playerDirection: {x: 0, y: 0}
 --- !u!114 &1957602840

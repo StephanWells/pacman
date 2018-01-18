@@ -6,11 +6,13 @@ public class GhostController : MonoBehaviour
 {
     public enum Mode { SCATTER, CHASE, FRIGHTENED, RECOVERY, IDLE };
     public enum Ghost { BLINKY, PINKY, INKY, CLYDE };
+
     private const float frightenedTime = 10f;
     private const float frightenedSlow = 0.5f;
+    public const float ghostSpeed = 0.4f;
 
-    public float ghostSpeed = 0.4f;
-    public float frightenedFactor = 1f;
+    public bool canMove = true;
+
     public Node startingPosition;
     public Node homeNode;
 
@@ -21,15 +23,16 @@ public class GhostController : MonoBehaviour
     private int stateIteration = 0;
     private float modeChangeTimer = 0;
     private float frightenedTimer = 0;
-    private AnimationController.State ghostState;
-    private GameObject ghostHouseEntrance;
+    public float frightenedFactor = 1f;
+
     private GameObject ghostHouse;
-
-    Mode currentMode, previousMode;
-
     private GameObject pacMan;
     private GameObject blinky;
     private GameBoard gameBoard;
+
+    private AnimationController.State ghostState;
+    private Mode currentMode, previousMode;
+
     private AnimationController animator;
 
     private Vector2 ghostDirection, nextDirection;
@@ -39,10 +42,10 @@ public class GhostController : MonoBehaviour
     {
         pacMan = GameObject.Find("Pacman");
         blinky = GameObject.Find("Blinky");
-        ghostHouseEntrance = GameObject.Find("StartNodeBlinky");
         ghostHouse = GameObject.Find("StartNodePinky");
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         animator = this.GetComponent<AnimationController>();
+
         currentMode = Mode.IDLE;
         ghostState = AnimationController.State.STILL;
 
@@ -51,11 +54,36 @@ public class GhostController : MonoBehaviour
         targetNode = ChooseNextNode();
     }
 
+    public void Restart()
+    {
+        transform.position = startingPosition.transform.position;
+        modeChangeTimer = 0;
+        frightenedTimer = 0;
+        stateIteration = 0;
+        frightenedFactor = 1f;
+
+        currentMode = Mode.IDLE;
+        previousMode = Mode.IDLE;
+        ghostState = AnimationController.State.RECOVERED;
+        animator.SetAnimatorState(ghostState);
+        ghostState = AnimationController.State.STILL;
+
+        currentNode = startingPosition;
+        previousNode = currentNode;
+        targetNode = ChooseNextNode();
+
+        canMove = true;
+    }
+
 	void Update()
     {
-        ModeUpdate();
-        Move();
-	}
+        if (canMove)
+        {
+            ModeUpdate();
+            Move();
+            CheckCollision();
+        }
+    }
 
     void Move()
     {
@@ -97,14 +125,6 @@ public class GhostController : MonoBehaviour
 
         List<Node> foundNodes = new List<Node>();
         List<Vector2> foundNodeDirections = new List<Vector2>();
-
-        if (ghost == Ghost.BLINKY)
-        {
-            Debug.Log("ChooseNextNode currentnode: " + currentNode);
-            Debug.Log("ChooseNextNode previousnode: " + previousNode);
-            Debug.Log("ChooseNextNode ghosthousebool: " + isInGhostHouse());
-            Debug.Log(currentNode.name);
-        }
         
         for (int i = 0; i < currentNode.neighbouringNodes.Length; i++)
         {
@@ -117,11 +137,6 @@ public class GhostController : MonoBehaviour
                 foundNodes.Add(tempNode);
                 foundNodeDirections.Add(tempDir);
             }
-        }
-
-        if (ghost == Ghost.BLINKY)
-        {
-            Debug.Log("ChooseNextNode nodecount: " + foundNodes.Count);
         }
 
         if (foundNodes.Count == 1)
@@ -239,7 +254,6 @@ public class GhostController : MonoBehaviour
 
             case Mode.FRIGHTENED:
                 targetTile = GetGhostScatterTile();
-                CheckCollision();
             break;
 
             case Mode.RECOVERY:
@@ -254,24 +268,8 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
-    void CheckCollision()
-    {
-        Rect ghostRect = new Rect(this.transform.position, this.transform.GetComponent<SpriteRenderer>().sprite.bounds.size / 4);
-        Rect pacmanRect = new Rect(pacMan.transform.position, pacMan.transform.GetComponent<SpriteRenderer>().sprite.bounds.size / 4);
-
-        if (ghostRect.Overlaps(pacmanRect))
-        {
-            enterRecoveryMode();
-        }
-    }
-
     void ModeUpdate()
     {
-        //if (ghost == Ghost.BLINKY)
-        //{
-        //    Debug.Log("Current node: " + currentNode + ". Previous node: " + previousNode + ". Target node: " + targetNode + ". Current mode: " + currentMode + ".");
-        //}
-
         if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY)
         {
             modeChangeTimer += Time.deltaTime;
@@ -326,6 +324,25 @@ public class GhostController : MonoBehaviour
         }
         
         currentMode = mode;
+    }
+
+    void CheckCollision()
+    {
+        Rect ghostRect = new Rect(this.transform.position, this.transform.GetComponent<SpriteRenderer>().sprite.bounds.size * 0.5f);
+        Rect pacmanRect = new Rect(pacMan.transform.position, pacMan.transform.GetComponent<SpriteRenderer>().sprite.bounds.size * 0.5f);
+
+        if (ghostRect.Overlaps(pacmanRect))
+        {
+            if (currentMode == Mode.FRIGHTENED)
+            {
+                StartCoroutine(Pause(1.0f));
+                enterRecoveryMode();
+            }
+            else if (currentMode != Mode.RECOVERY)
+            {
+                gameBoard.StartDeath();
+            }
+        }
     }
 
     public void enterFrightenedMode()
@@ -388,5 +405,43 @@ public class GhostController : MonoBehaviour
             previousNode = temp;
             currentNode = null;
         }
+    }
+
+    IEnumerator Pause(float delay)
+    {
+        this.GetComponent<SpriteRenderer>().enabled = false;
+        pacMan.GetComponent<SpriteRenderer>().enabled = false;
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<Animator>().enabled = false;
+            ghost.GetComponent<GhostController>().canMove = false;
+        }
+
+        pacMan.GetComponent<Animator>().enabled = false;
+        pacMan.GetComponent<PacmanController>().canMove = false;
+
+        yield return new WaitForSeconds(delay);
+
+        Resume();
+    }
+
+    void Resume()
+    {
+        this.GetComponent<SpriteRenderer>().enabled = true;
+        pacMan.GetComponent<SpriteRenderer>().enabled = true;
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<Animator>().enabled = true;
+            ghost.GetComponent<GhostController>().canMove = true;
+        }
+
+        pacMan.GetComponent<Animator>().enabled = true;
+        pacMan.GetComponent<PacmanController>().canMove = true;
     }
 }
