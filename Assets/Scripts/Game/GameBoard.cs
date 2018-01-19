@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GameBoard : MonoBehaviour
 {
@@ -13,6 +14,8 @@ public class GameBoard : MonoBehaviour
     public GameObject[,] pellets = new GameObject[boardWidth, boardHeight]; // Locations of the dots and power pills.
     public GameObject[,] nodes = new GameObject[boardWidth, boardHeight]; // Locations of the back-end movement nodes/waypoints.
     bool startDeath = false;
+
+    public Text readyText;
 
 	void Start ()
     {
@@ -35,7 +38,69 @@ public class GameBoard : MonoBehaviour
                 nodes[board.x, board.y] = obj;
             }
         }
+
+        StartGame();
 	}
+
+    public void StartGame()
+    {
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<SpriteRenderer>().enabled = false;
+            ghost.GetComponent<Animator>().enabled = false;
+            ghost.GetComponent<GhostController>().canMove = false;
+        }
+
+        GameObject pacMan = GameObject.Find("Pacman");
+
+        pacMan.GetComponent<SpriteRenderer>().enabled = false;
+        pacMan.GetComponent<Animator>().enabled = false;
+        pacMan.GetComponent<PacmanController>().canMove = false;
+
+        StartCoroutine(ShowObjectsAfter(2.0f));
+    }
+
+    IEnumerator ShowObjectsAfter(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<SpriteRenderer>().enabled = true;
+        }
+
+        GameObject pacMan = GameObject.Find("Pacman");
+
+        pacMan.GetComponent<SpriteRenderer>().enabled = true;
+
+        readyText.GetComponent<Text>().enabled = true;
+
+        StartCoroutine(StartGameAfter(2.0f));
+    }
+
+    IEnumerator StartGameAfter(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<Animator>().enabled = true;
+            ghost.GetComponent<GhostController>().canMove = true;
+        }
+
+        GameObject pacMan = GameObject.Find("Pacman");
+
+        pacMan.GetComponent<Animator>().enabled = true;
+        pacMan.GetComponent<PacmanController>().canMove = true;
+
+        readyText.GetComponent<Text>().enabled = false;
+    }
 
     public void Restart()
     {
@@ -69,7 +134,7 @@ public class GameBoard : MonoBehaviour
 
         GameObject pacMan = GameObject.Find("Pacman");
         pacMan.GetComponent<PacmanController>().canMove = false;
-        pacMan.transform.GetComponent<Animator>().enabled = false;
+        pacMan.GetComponent<Animator>().enabled = false;
 
         StartCoroutine(ProcessDeathAfter(1.0f));
     }
@@ -97,6 +162,8 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
+        readyText.GetComponent<Text>().enabled = true;
+
         StartCoroutine(ProcessStart(1.5f));
     }
 
@@ -107,7 +174,18 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
+        readyText.GetComponent<Text>().enabled = false;
+
         Restart();
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<GhostController>().canMove = true;
+        }
+
+        pacMan.GetComponent<PacmanController>().canMove = true;
     }
 
     // Translates unity coordinates to coordinates on the game board.

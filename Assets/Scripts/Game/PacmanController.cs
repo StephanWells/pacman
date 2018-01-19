@@ -45,8 +45,6 @@ public class PacmanController : MonoBehaviour
         playerState = AnimationController.State.MOVING;
         currentNode = startingPosition;
         ChangePosition(playerDirection);
-
-        canMove = true;
     }
 
     // Called every tick.

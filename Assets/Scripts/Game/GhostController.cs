@@ -9,13 +9,13 @@ public class GhostController : MonoBehaviour
 
     private const float frightenedTime = 10f;
     private const float frightenedSlow = 0.5f;
-    public const float ghostSpeed = 0.4f;
 
     public bool canMove = true;
 
+    public float ghostSpeed;
     public Node startingPosition;
     public Node homeNode;
-
+    
     public int[] timers = new int[8];
     public Mode[] modes = new Mode[8];
     public Ghost ghost;
@@ -23,7 +23,7 @@ public class GhostController : MonoBehaviour
     private int stateIteration = 0;
     private float modeChangeTimer = 0;
     private float frightenedTimer = 0;
-    public float frightenedFactor = 1f;
+    private float frightenedFactor = 1f;
 
     private GameObject ghostHouse;
     private GameObject pacMan;
@@ -71,8 +71,6 @@ public class GhostController : MonoBehaviour
         currentNode = startingPosition;
         previousNode = currentNode;
         targetNode = ChooseNextNode();
-
-        canMove = true;
     }
 
 	void Update()
@@ -366,7 +364,7 @@ public class GhostController : MonoBehaviour
     {
         ChangeMode(Mode.RECOVERY);
         ghostState = AnimationController.State.RECOVERY;
-        frightenedFactor = 1f;
+        frightenedFactor = 1.2f;
     }
 
     void exitFrightenedMode()
@@ -382,6 +380,7 @@ public class GhostController : MonoBehaviour
         stateIteration = 1;
         ChangeMode(modes[stateIteration]);
         ghostState = AnimationController.State.RECOVERED;
+        frightenedFactor = 1f;
     }
 
     bool isInGhostHouse()
