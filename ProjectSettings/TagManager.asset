@@ -5,6 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ghost
+  - UI
+  - Life
+  - GhostScore
   layers:
   - Default
   - TransparentFX

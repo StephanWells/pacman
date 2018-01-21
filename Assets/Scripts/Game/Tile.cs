@@ -22,7 +22,6 @@ public class Tile : MonoBehaviour
         {
             this.GetComponent<SpriteRenderer>().enabled = false;
             consumed = true;
-            gameBoard.score++;
             gameBoard.pelletsConsumed++;
         }
     }

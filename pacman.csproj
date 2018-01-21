@@ -289,11 +289,14 @@
     <Compile Include="Assets\Scripts\Game\AnimationController.cs" />
     <Compile Include="Assets\Scripts\Game\GameBoard.cs" />
     <Compile Include="Assets\Scripts\Game\GhostController.cs" />
+    <Compile Include="Assets\Scripts\Game\HighScore.cs" />
     <Compile Include="Assets\Scripts\Game\Node.cs" />
     <Compile Include="Assets\Scripts\Game\PacmanController.cs" />
     <Compile Include="Assets\Scripts\Game\Tile.cs" />
-    <Compile Include="Assets\Scripts\Menu\GameMenu.cs" />
-    <Compile Include="Assets\Scripts\Menu\TextBlink.cs" />
+    <Compile Include="Assets\Scripts\UI\GameMenu.cs" />
+    <Compile Include="Assets\Scripts\UI\Lives.cs" />
+    <Compile Include="Assets\Scripts\UI\Score.cs" />
+    <Compile Include="Assets\Scripts\UI\TextBlink.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />

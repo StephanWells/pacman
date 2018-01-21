@@ -4,8 +4,6 @@ using UnityEngine;
 
 public class PacmanController : MonoBehaviour
 {
-    public float playerSpeed;
-
     public bool canMove = true;
 
     public Node startingPosition;
@@ -17,6 +15,7 @@ public class PacmanController : MonoBehaviour
     private GameObject[] ghosts = new GameObject[4];
     private Node currentNode, previousNode, targetNode;
     private GameBoard gameBoard;
+    private float playerSpeed = 0f;
 
     // Called when the game starts.
     void Start()
@@ -30,10 +29,38 @@ public class PacmanController : MonoBehaviour
         ghosts[2] = GameObject.Find("Inky");
         ghosts[3] = GameObject.Find("Clyde");
 
+        SetDifficulty(GameBoard.level);
+
         playerDirection = Vector2.right;
         playerState = AnimationController.State.MOVING;
         currentNode = startingPosition;
         ChangePosition(playerDirection);
+    }
+
+    private void SetDifficulty(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                playerSpeed = 0.57f;
+            break;
+
+            case 2:
+                playerSpeed = 0.62f;
+            break;
+
+            case 3:
+                playerSpeed = 0.67f;
+            break;
+
+            case 4:
+                playerSpeed = 0.72f;
+            break;
+
+            default:
+                playerSpeed = 0.8f;
+            break;
+        }
     }
 
     public void Restart()
@@ -176,14 +203,20 @@ public class PacmanController : MonoBehaviour
         {
             Tile tile = obj.GetComponent<Tile>();
 
-            if (tile != null)
+            if (tile != null && !tile.consumed)
             {
-                if (tile.isPowerPill && !tile.consumed)
+                if (tile.isPowerPill)
                 {
                     for (int i = 0; i < ghosts.Length; i++)
                     {
-                        ghosts[i].GetComponent<GhostController>().enterFrightenedMode();
+                        ghosts[i].GetComponent<GhostController>().EnterFrightenedMode();
                     }
+
+                    Score.PowerPill();
+                }
+                else if (tile.isDot)
+                {
+                    Score.Dot();
                 }
 
                 obj.GetComponent<Tile>().consume();

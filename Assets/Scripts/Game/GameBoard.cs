@@ -2,22 +2,38 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class GameBoard : MonoBehaviour
 {
-    private static int boardWidth = 26; // Number of units horizontally along the Pacman game board.
-    private static int boardHeight = 29; // Number of units vertically along the Pacman game board.
+    private const int boardWidth = 26; // Number of units horizontally along the Pacman game board.
+    private const int boardHeight = 29; // Number of units vertically along the Pacman game board.
+    private const int pelletsInLevel = 246;
+
+    public static int defaultLives = 3;
+    public static int pacmanLives = defaultLives;
+    private GameObject[] lives;
+
+    public static int level = 1;
+
     public int totalPellets = 0;
     public int pelletsConsumed = 0;
-    public int score = 0;
-    public int pacmanLives = 3;
+
     public GameObject[,] pellets = new GameObject[boardWidth, boardHeight]; // Locations of the dots and power pills.
     public GameObject[,] nodes = new GameObject[boardWidth, boardHeight]; // Locations of the back-end movement nodes/waypoints.
+
     bool startDeath = false;
+    private bool shouldBlink = false;
+
+    private const float blinkInterval = 0.33f;
+    private float blinkIntervalTimer = 0;
+
+    public Sprite mazeBlue;
+    public Sprite mazeWhite;
 
     public Text readyText;
 
-	void Start ()
+	void Start()
     {
         Object[] objects = GameObject.FindObjectsOfType(typeof(GameObject));
 
@@ -39,6 +55,8 @@ public class GameBoard : MonoBehaviour
             }
         }
 
+        lives = GameObject.FindGameObjectsWithTag("Life");
+
         StartGame();
 	}
 
@@ -51,6 +69,11 @@ public class GameBoard : MonoBehaviour
             ghost.GetComponent<SpriteRenderer>().enabled = false;
             ghost.GetComponent<Animator>().enabled = false;
             ghost.GetComponent<GhostController>().canMove = false;
+        }
+
+        foreach (GameObject life in lives)
+        {
+            life.GetComponent<Lives>().UpdateLives();
         }
 
         GameObject pacMan = GameObject.Find("Pacman");
@@ -107,8 +130,7 @@ public class GameBoard : MonoBehaviour
         GameObject pacMan = GameObject.Find("Pacman");
         pacMan.GetComponent<PacmanController>().Restart();
         pacMan.GetComponent<SpriteRenderer>().enabled = true;
-        pacmanLives--;
-
+        
         GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
 
         foreach (GameObject ghost in ghosts)
@@ -123,6 +145,13 @@ public class GameBoard : MonoBehaviour
         if (!startDeath)
         {
             startDeath = true;
+        }
+
+        Lives.LoseALife();
+
+        foreach (GameObject life in lives)
+        {
+            life.GetComponent<Lives>().UpdateLives();
         }
 
         GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
@@ -162,15 +191,45 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        readyText.GetComponent<Text>().enabled = true;
+        pacMan.GetComponent<SpriteRenderer>().enabled = false;
 
-        StartCoroutine(ProcessStart(1.5f));
+        if (pacmanLives <= 0)
+        {
+            readyText.GetComponent<Text>().text = "GAME OVER";
+            readyText.GetComponent<Text>().color = new Color(153f / 255f, 0, 0);
+            readyText.GetComponent<Text>().enabled = true;
+
+            StartCoroutine(ProcessGameOver(2f));
+        }
+        else
+        {
+            readyText.GetComponent<Text>().text = "READY!";
+            readyText.GetComponent<Text>().color = new Color(1, 1, 0);
+            readyText.GetComponent<Text>().enabled = true;
+
+            StartCoroutine(ProcessStart(1.5f));
+        }
+    }
+
+    IEnumerator ProcessGameOver(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (Score.score > HighScore.highScore)
+        {
+            HighScore.UpdateHighScore();
+        }
+
+        Score.ResetScore();
+        Lives.ResetLives();
+        level = 1;
+
+        SceneManager.LoadScene("GameMenu");
     }
 
     IEnumerator ProcessStart(float delay)
     {
         GameObject pacMan = GameObject.Find("Pacman");
-        pacMan.GetComponent<SpriteRenderer>().enabled = false;
 
         yield return new WaitForSeconds(delay);
 
@@ -186,6 +245,106 @@ public class GameBoard : MonoBehaviour
         }
 
         pacMan.GetComponent<PacmanController>().canMove = true;
+        startDeath = false;
+    }
+
+    void Update()
+    {
+        CheckPellets();
+        CheckBlink();
+    }
+
+    void CheckPellets()
+    {
+        if (pelletsConsumed >= pelletsInLevel)
+        {
+            StartCoroutine(ProcessWin(1f));
+        }
+    }
+
+    IEnumerator ProcessWin(float delay)
+    {
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<PacmanController>().canMove = false;
+        pacMan.GetComponent<Animator>().enabled = false;
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<GhostController>().canMove = false;
+            ghost.GetComponent<Animator>().enabled = false;
+        }
+
+        yield return new WaitForSeconds(delay);
+
+        StartCoroutine(BlinkBoard(2f));
+    }
+
+    IEnumerator BlinkBoard(float delay)
+    {
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<SpriteRenderer>().enabled = false;
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<SpriteRenderer>().enabled = false;
+        }
+
+        shouldBlink = true;
+
+        yield return new WaitForSeconds(delay);
+
+        shouldBlink = false;
+
+        NextLevel();
+    }
+
+    private void CheckBlink()
+    {
+        if (shouldBlink)
+        {
+            if (blinkIntervalTimer < blinkInterval)
+            {
+                blinkIntervalTimer += Time.deltaTime;
+            }
+            else
+            {
+                SpriteRenderer mazeSprite = GameObject.Find("Maze").GetComponent<SpriteRenderer>();
+                blinkIntervalTimer = 0;
+
+                if (mazeSprite.sprite == mazeBlue)
+                {
+                    mazeSprite.sprite = mazeWhite;
+                }
+                else
+                {
+                    mazeSprite.sprite = mazeBlue;
+                }
+            }
+        }
+    }
+
+    private void NextLevel()
+    {
+        level++;
+        SceneManager.LoadScene("Game");
+    }
+
+    // Adds a ghost score popup at the given location.
+    public void GhostScorePopup(int score, Vector2 location)
+    {
+        GameObject scoreImage = GameObject.Find("GhostScorePopup" + score.ToString());
+        scoreImage.GetComponent<SpriteRenderer>().enabled = true;
+        scoreImage.transform.position = location;
+    }
+
+    public void ghostScorePopupRemove(int score)
+    {
+        GameObject scoreImage = GameObject.Find("GhostScorePopup" + score.ToString());
+        scoreImage.GetComponent<SpriteRenderer>().enabled = false;
     }
 
     // Translates unity coordinates to coordinates on the game board.

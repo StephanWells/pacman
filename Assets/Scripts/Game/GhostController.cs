@@ -7,20 +7,22 @@ public class GhostController : MonoBehaviour
     public enum Mode { SCATTER, CHASE, FRIGHTENED, RECOVERY, IDLE };
     public enum Ghost { BLINKY, PINKY, INKY, CLYDE };
 
-    private const float frightenedTime = 10f;
-    private const float frightenedSlow = 0.5f;
+    private float frightenedTime = 0f;
+    private float frightenedSlow = 0f;
+    private float ghostSpeed = 0f;
+    private float recoveryFactor = 0f;
 
     public bool canMove = true;
 
-    public float ghostSpeed;
     public Node startingPosition;
     public Node homeNode;
     
     public int[] timers = new int[8];
-    public Mode[] modes = new Mode[8];
+    public Mode[] modes = new Mode[9];
     public Ghost ghost;
 
     private int stateIteration = 0;
+    private static int consumedGhosts = 0;
     private float modeChangeTimer = 0;
     private float frightenedTimer = 0;
     private float frightenedFactor = 1f;
@@ -46,12 +48,193 @@ public class GhostController : MonoBehaviour
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         animator = this.GetComponent<AnimationController>();
 
+        SetDifficulty(GameBoard.level);
+
         currentMode = Mode.IDLE;
         ghostState = AnimationController.State.STILL;
 
         currentNode = startingPosition;
         previousNode = currentNode;
         targetNode = ChooseNextNode();
+    }
+
+    private void SetDifficulty(int level)
+    {
+        switch (level)
+        {
+            case 1:
+                ghostSpeed = 0.5f;
+                frightenedTime = 10f;
+                frightenedSlow = 0.36f;
+                recoveryFactor = 1.2f;
+
+                modes[0] = Mode.IDLE;
+                modes[8] = Mode.CHASE;
+
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.PINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.INKY:
+                        timers[0] = 4;
+                    break;
+
+                    case Ghost.CLYDE:
+                        timers[0] = 8;
+                    break;
+                }
+
+                timers[1] = 7; modes[1] = Mode.SCATTER;
+                timers[3] = 7; modes[3] = Mode.SCATTER;
+                timers[5] = 5; modes[5] = Mode.SCATTER;
+                timers[7] = 5; modes[7] = Mode.SCATTER;
+
+                timers[2] = 20; modes[2] = Mode.CHASE;
+                timers[4] = 20; modes[4] = Mode.CHASE;
+                timers[6] = 20; modes[6] = Mode.CHASE;
+            break;
+
+            case 2:
+                ghostSpeed = 0.55f;
+                frightenedTime = 9f;
+                frightenedSlow = 0.46f;
+                recoveryFactor = 1.4f;
+
+                modes[0] = Mode.IDLE;
+                modes[8] = Mode.CHASE;
+
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.PINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.INKY:
+                        timers[0] = 3;
+                    break;
+
+                    case Ghost.CLYDE:
+                        timers[0] = 6;
+                    break;
+                }
+
+                timers[1] = 7; modes[1] = Mode.SCATTER;
+                timers[3] = 6; modes[3] = Mode.SCATTER;
+                timers[5] = 5; modes[5] = Mode.SCATTER;
+                timers[7] = 4; modes[7] = Mode.SCATTER;
+
+                timers[2] = 20; modes[2] = Mode.CHASE;
+                timers[4] = 20; modes[4] = Mode.CHASE;
+                timers[6] = 20; modes[6] = Mode.CHASE;
+            break;
+
+            case 3:
+                ghostSpeed = 0.6f;
+                frightenedTime = 7f;
+                frightenedSlow = 0.6f;
+                recoveryFactor = 1.6f;
+
+                modes[0] = Mode.IDLE;
+                modes[8] = Mode.CHASE;
+
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.PINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.INKY:
+                        timers[0] = 2;
+                    break;
+
+                    case Ghost.CLYDE:
+                        timers[0] = 4;
+                    break;
+                }
+
+                timers[1] = 5; modes[1] = Mode.SCATTER;
+                timers[3] = 5; modes[3] = Mode.SCATTER;
+                timers[5] = 4; modes[5] = Mode.SCATTER;
+                timers[7] = 4; modes[7] = Mode.SCATTER;
+
+                timers[2] = 20; modes[2] = Mode.CHASE;
+                timers[4] = 20; modes[4] = Mode.CHASE;
+                timers[6] = 20; modes[6] = Mode.CHASE;
+            break;
+
+            case 4:
+                ghostSpeed = 0.65f;
+                frightenedTime = 6f;
+                frightenedSlow = 0.8f;
+                recoveryFactor = 1.8f;
+
+                modes[0] = Mode.IDLE;
+                modes[8] = Mode.CHASE;
+
+                switch (ghost)
+                {
+                    case Ghost.BLINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.PINKY:
+                        timers[0] = 0;
+                    break;
+
+                    case Ghost.INKY:
+                        timers[0] = 1;
+                    break;
+
+                    case Ghost.CLYDE:
+                        timers[0] = 2;
+                    break;
+                }
+
+                timers[1] = 4; modes[1] = Mode.SCATTER;
+                timers[3] = 4; modes[3] = Mode.SCATTER;
+                timers[5] = 3; modes[5] = Mode.SCATTER;
+                timers[7] = 3; modes[7] = Mode.SCATTER;
+
+                timers[2] = 20; modes[2] = Mode.CHASE;
+                timers[4] = 20; modes[4] = Mode.CHASE;
+                timers[6] = 20; modes[6] = Mode.CHASE;
+            break;
+
+            default:
+                ghostSpeed = 0.75f;
+                frightenedTime = 5f;
+                frightenedSlow = 0.9f;
+                recoveryFactor = 2f;
+
+                modes[0] = Mode.IDLE;
+                modes[8] = Mode.CHASE;
+
+                timers[0] = 0;
+
+                timers[1] = 0; modes[1] = Mode.SCATTER;
+                timers[3] = 0; modes[3] = Mode.SCATTER;
+                timers[5] = 0; modes[5] = Mode.SCATTER;
+                timers[7] = 0; modes[7] = Mode.SCATTER;
+
+                timers[2] = 0; modes[2] = Mode.CHASE;
+                timers[4] = 0; modes[4] = Mode.CHASE;
+                timers[6] = 0; modes[6] = Mode.CHASE;
+            break;
+        }
     }
 
     public void Restart()
@@ -130,7 +313,7 @@ public class GhostController : MonoBehaviour
             Node tempNode = currentNode.neighbouringNodes[i];
             bool isValidDirection = tempDir != ghostDirection * -1;
 
-            if ((isValidDirection && !tempNode.isGhostNode) || (isValidDirection && currentMode == Mode.RECOVERY) || (isInGhostHouse()))
+            if ((isValidDirection && !tempNode.isGhostNode) || (isValidDirection && currentMode == Mode.RECOVERY) || (IsInGhostHouse()))
             {
                 foundNodes.Add(tempNode);
                 foundNodeDirections.Add(tempDir);
@@ -297,19 +480,19 @@ public class GhostController : MonoBehaviour
 
             if (frightenedTimer >= frightenedTime * 0.7 && ghostState == AnimationController.State.FRIGHTENED)
             {
-                enterFrightened2Mode();
+                EnterFrightened2Mode();
             }
 
             if (frightenedTimer >= frightenedTime)
             {
-                exitFrightenedMode();
+                ExitFrightenedMode();
             }
         }
         else
         {
             if (previousNode == ghostHouse.GetComponent<Node>())
             {
-                exitRecoveryMode();
+                ExitRecoveryMode();
             }
         }
     }
@@ -333,8 +516,10 @@ public class GhostController : MonoBehaviour
         {
             if (currentMode == Mode.FRIGHTENED)
             {
+                consumedGhosts++;
                 StartCoroutine(Pause(1.0f));
-                enterRecoveryMode();
+                EnterRecoveryMode();
+                Score.Ghost(consumedGhosts);
             }
             else if (currentMode != Mode.RECOVERY)
             {
@@ -343,38 +528,39 @@ public class GhostController : MonoBehaviour
         }
     }
 
-    public void enterFrightenedMode()
+    public void EnterFrightenedMode()
     {
         if (currentMode != Mode.IDLE && currentMode != Mode.RECOVERY)
         {
+            consumedGhosts = 0;
             frightenedTimer = 0;
             ChangeMode(Mode.FRIGHTENED);
             ghostState = AnimationController.State.FRIGHTENED;
             frightenedFactor = frightenedSlow;
-            reverseDirection();
+            ReverseDirection();
         }
     }
 
-    public void enterFrightened2Mode()
+    public void EnterFrightened2Mode()
     {
         ghostState = AnimationController.State.FRIGHTENED2;
     }
 
-    public void enterRecoveryMode()
+    public void EnterRecoveryMode()
     {
         ChangeMode(Mode.RECOVERY);
         ghostState = AnimationController.State.RECOVERY;
-        frightenedFactor = 1.2f;
+        frightenedFactor = recoveryFactor;
     }
 
-    void exitFrightenedMode()
+    void ExitFrightenedMode()
     {
         ChangeMode(previousMode);
         ghostState = AnimationController.State.RECOVERED;
         frightenedFactor = 1f;
     }
 
-    void exitRecoveryMode()
+    void ExitRecoveryMode()
     {
         modeChangeTimer = 0;
         stateIteration = 1;
@@ -383,19 +569,19 @@ public class GhostController : MonoBehaviour
         frightenedFactor = 1f;
     }
 
-    bool isInGhostHouse()
+    bool IsInGhostHouse()
     {
         return currentNode.name.Equals("StartNodePinky") || currentNode.name.Equals("StartNodeInky") || currentNode.name.Equals("StartNodeClyde");
     }
 
-    bool isLeavingInGhostHouse()
+    bool IsLeavingInGhostHouse()
     {
         return previousNode.name.Equals("StartNodePinky") || previousNode.name.Equals("StartNodeInky") || previousNode.name.Equals("StartNodeClyde");
     }
 
-    void reverseDirection()
+    void ReverseDirection()
     {
-        if (!isLeavingInGhostHouse())
+        if (!IsLeavingInGhostHouse())
         {
             ghostDirection *= -1;
 
@@ -422,6 +608,8 @@ public class GhostController : MonoBehaviour
         pacMan.GetComponent<Animator>().enabled = false;
         pacMan.GetComponent<PacmanController>().canMove = false;
 
+        gameBoard.GhostScorePopup(Score.GetGhostScore(consumedGhosts), this.transform.position);
+
         yield return new WaitForSeconds(delay);
 
         Resume();
@@ -442,5 +630,7 @@ public class GhostController : MonoBehaviour
 
         pacMan.GetComponent<Animator>().enabled = true;
         pacMan.GetComponent<PacmanController>().canMove = true;
+
+        gameBoard.ghostScorePopupRemove(Score.GetGhostScore(consumedGhosts));
     }
 }
