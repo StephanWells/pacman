@@ -17,7 +17,7 @@ public class GhostController : MonoBehaviour
     public Node startingPosition;
     public Node homeNode;
     
-    public int[] timers = new int[8];
+    public float[] timers = new float[8];
     public Mode[] modes = new Mode[9];
     public Ghost ghost;
 
@@ -60,181 +60,24 @@ public class GhostController : MonoBehaviour
 
     private void SetDifficulty(int level)
     {
-        switch (level)
-        {
-            case 1:
-                ghostSpeed = 0.5f;
-                frightenedTime = 10f;
-                frightenedSlow = 0.36f;
-                recoveryFactor = 1.2f;
+        Level currentLevel = GameBoard.levels[level - 1];
 
-                modes[0] = Mode.IDLE;
-                modes[8] = Mode.CHASE;
+        ghostSpeed = currentLevel.GetGhostSpeed();
+        frightenedTime = currentLevel.GetGhostFrightenedTime();
+        frightenedSlow = currentLevel.GetGhostFrightenedSlow();
+        recoveryFactor = currentLevel.GetGhostRecoveryFactor();
 
-                switch (ghost)
-                {
-                    case Ghost.BLINKY:
-                        timers[0] = 0;
-                    break;
+        modes = currentLevel.GetDefaultGhostModes();
+        timers = currentLevel.GetGhostTimers(ghost);
 
-                    case Ghost.PINKY:
-                        timers[0] = 0;
-                    break;
+        timers[1] = 7; modes[1] = Mode.SCATTER;
+        timers[3] = 7; modes[3] = Mode.SCATTER;
+        timers[5] = 5; modes[5] = Mode.SCATTER;
+        timers[7] = 5; modes[7] = Mode.SCATTER;
 
-                    case Ghost.INKY:
-                        timers[0] = 4;
-                    break;
-
-                    case Ghost.CLYDE:
-                        timers[0] = 8;
-                    break;
-                }
-
-                timers[1] = 7; modes[1] = Mode.SCATTER;
-                timers[3] = 7; modes[3] = Mode.SCATTER;
-                timers[5] = 5; modes[5] = Mode.SCATTER;
-                timers[7] = 5; modes[7] = Mode.SCATTER;
-
-                timers[2] = 20; modes[2] = Mode.CHASE;
-                timers[4] = 20; modes[4] = Mode.CHASE;
-                timers[6] = 20; modes[6] = Mode.CHASE;
-            break;
-
-            case 2:
-                ghostSpeed = 0.55f;
-                frightenedTime = 9f;
-                frightenedSlow = 0.46f;
-                recoveryFactor = 1.4f;
-
-                modes[0] = Mode.IDLE;
-                modes[8] = Mode.CHASE;
-
-                switch (ghost)
-                {
-                    case Ghost.BLINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.PINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.INKY:
-                        timers[0] = 3;
-                    break;
-
-                    case Ghost.CLYDE:
-                        timers[0] = 6;
-                    break;
-                }
-
-                timers[1] = 7; modes[1] = Mode.SCATTER;
-                timers[3] = 6; modes[3] = Mode.SCATTER;
-                timers[5] = 5; modes[5] = Mode.SCATTER;
-                timers[7] = 4; modes[7] = Mode.SCATTER;
-
-                timers[2] = 20; modes[2] = Mode.CHASE;
-                timers[4] = 20; modes[4] = Mode.CHASE;
-                timers[6] = 20; modes[6] = Mode.CHASE;
-            break;
-
-            case 3:
-                ghostSpeed = 0.6f;
-                frightenedTime = 7f;
-                frightenedSlow = 0.6f;
-                recoveryFactor = 1.6f;
-
-                modes[0] = Mode.IDLE;
-                modes[8] = Mode.CHASE;
-
-                switch (ghost)
-                {
-                    case Ghost.BLINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.PINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.INKY:
-                        timers[0] = 2;
-                    break;
-
-                    case Ghost.CLYDE:
-                        timers[0] = 4;
-                    break;
-                }
-
-                timers[1] = 5; modes[1] = Mode.SCATTER;
-                timers[3] = 5; modes[3] = Mode.SCATTER;
-                timers[5] = 4; modes[5] = Mode.SCATTER;
-                timers[7] = 4; modes[7] = Mode.SCATTER;
-
-                timers[2] = 20; modes[2] = Mode.CHASE;
-                timers[4] = 20; modes[4] = Mode.CHASE;
-                timers[6] = 20; modes[6] = Mode.CHASE;
-            break;
-
-            case 4:
-                ghostSpeed = 0.65f;
-                frightenedTime = 6f;
-                frightenedSlow = 0.8f;
-                recoveryFactor = 1.8f;
-
-                modes[0] = Mode.IDLE;
-                modes[8] = Mode.CHASE;
-
-                switch (ghost)
-                {
-                    case Ghost.BLINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.PINKY:
-                        timers[0] = 0;
-                    break;
-
-                    case Ghost.INKY:
-                        timers[0] = 1;
-                    break;
-
-                    case Ghost.CLYDE:
-                        timers[0] = 2;
-                    break;
-                }
-
-                timers[1] = 4; modes[1] = Mode.SCATTER;
-                timers[3] = 4; modes[3] = Mode.SCATTER;
-                timers[5] = 3; modes[5] = Mode.SCATTER;
-                timers[7] = 3; modes[7] = Mode.SCATTER;
-
-                timers[2] = 20; modes[2] = Mode.CHASE;
-                timers[4] = 20; modes[4] = Mode.CHASE;
-                timers[6] = 20; modes[6] = Mode.CHASE;
-            break;
-
-            default:
-                ghostSpeed = 0.75f;
-                frightenedTime = 5f;
-                frightenedSlow = 0.9f;
-                recoveryFactor = 2f;
-
-                modes[0] = Mode.IDLE;
-                modes[8] = Mode.CHASE;
-
-                timers[0] = 0;
-
-                timers[1] = 0; modes[1] = Mode.SCATTER;
-                timers[3] = 0; modes[3] = Mode.SCATTER;
-                timers[5] = 0; modes[5] = Mode.SCATTER;
-                timers[7] = 0; modes[7] = Mode.SCATTER;
-
-                timers[2] = 0; modes[2] = Mode.CHASE;
-                timers[4] = 0; modes[4] = Mode.CHASE;
-                timers[6] = 0; modes[6] = Mode.CHASE;
-            break;
-        }
+        timers[2] = 20; modes[2] = Mode.CHASE;
+        timers[4] = 20; modes[4] = Mode.CHASE;
+        timers[6] = 20; modes[6] = Mode.CHASE;   
     }
 
     public void Restart()
@@ -516,16 +359,21 @@ public class GhostController : MonoBehaviour
         {
             if (currentMode == Mode.FRIGHTENED)
             {
-                consumedGhosts++;
-                StartCoroutine(Pause(1.0f));
-                EnterRecoveryMode();
-                Score.Ghost(consumedGhosts);
+                Consume();
             }
             else if (currentMode != Mode.RECOVERY)
             {
                 gameBoard.StartDeath();
             }
         }
+    }
+
+    void Consume()
+    {
+        consumedGhosts++;
+        StartCoroutine(Pause(1.0f));
+        Score.Ghost(consumedGhosts);
+        EnterRecoveryMode();
     }
 
     public void EnterFrightenedMode()
@@ -631,6 +479,6 @@ public class GhostController : MonoBehaviour
         pacMan.GetComponent<Animator>().enabled = true;
         pacMan.GetComponent<PacmanController>().canMove = true;
 
-        gameBoard.ghostScorePopupRemove(Score.GetGhostScore(consumedGhosts));
+        gameBoard.GhostScorePopupRemove(Score.GetGhostScore(consumedGhosts));
     }
 }

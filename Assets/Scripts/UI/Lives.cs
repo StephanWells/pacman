@@ -14,8 +14,19 @@ public class Lives : MonoBehaviour
         {
             this.GetComponent<Image>().enabled = false;
         }
+        else
+        {
+            this.GetComponent<Image>().enabled = true;
+        }
     }
 
+    public static void AddALife()
+    {
+        if (GameBoard.pacmanLives < 3)
+        {
+            GameBoard.pacmanLives++;
+        }
+    }
     public static void LoseALife()
     {
         GameBoard.pacmanLives--;
