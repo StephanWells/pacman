@@ -39,28 +39,9 @@ public class PacmanController : MonoBehaviour
 
     private void SetDifficulty(int level)
     {
-        switch (level)
-        {
-            case 1:
-                playerSpeed = 0.57f;
-            break;
+        Level currentLevel = GameBoard.levels[level - 1];
 
-            case 2:
-                playerSpeed = 0.62f;
-            break;
-
-            case 3:
-                playerSpeed = 0.67f;
-            break;
-
-            case 4:
-                playerSpeed = 0.72f;
-            break;
-
-            default:
-                playerSpeed = 0.8f;
-            break;
-        }
+        playerSpeed = currentLevel.GetPacmanSpeed();
     }
 
     public void Restart()
@@ -218,8 +199,12 @@ public class PacmanController : MonoBehaviour
                 {
                     Score.Dot();
                 }
+                else if (tile.isBonusItem)
+                {
+                    Score.BonusItem(tile);
+                }
 
-                obj.GetComponent<Tile>().consume();
+                obj.GetComponent<Tile>().Consume();
             }
         }
     }
