@@ -313,7 +313,7 @@ public class GameBoard : MonoBehaviour
         if (pelletsConsumed >= pelletsInLevel)
         {
             pelletsConsumed = 0;
-            float delay = audioEngine.Transition();
+            float delay = (float)audioEngine.Transition();
             StartCoroutine(ProcessWin(delay));
         }
         else if (pelletsConsumed >= 70 && pelletsConsumed < 170 && !didSpawnBonusItem1)
@@ -344,7 +344,7 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        blinkInterval = (60f / (float)AudioEngine.transitions[level - 1].GetComponent<MusicSource>().BPM);
+        blinkInterval = (60f / (float)AudioEngine.transitions[level - 1, 0].GetComponent<MusicSource>().BPM);
 
         StartCoroutine(BlinkBoard(blinkInterval * 4));
     }
@@ -398,7 +398,7 @@ public class GameBoard : MonoBehaviour
 
     private void NextLevel()
     {
-        level++;
+        level = level == 8 ? 8 : level + 1;
         audioEngine.UpdateLevel();
         Start();
 

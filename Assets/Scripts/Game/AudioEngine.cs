@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using MEC;
 
 public class AudioEngine : MonoBehaviour
 {
@@ -15,7 +16,7 @@ public class AudioEngine : MonoBehaviour
     public static AudioSource[] levelMusic;
     public static AudioSource[] levelFdMusic;
     public static AudioSource[] levelDeath;
-    public static AudioSource[] transitions;
+    public static AudioSource[,] transitions;
 
     private static float stopTime;
     private static float varTimer;
@@ -54,7 +55,7 @@ public class AudioEngine : MonoBehaviour
     {
         audioObj = GameObject.Find("Audio"); // Gets the object that the AudioEngine component is attached to.
 
-        transitions = new AudioSource[8];
+        transitions = new AudioSource[8, 4];
 
         // Load audio.
         LoadSoundEffects();
@@ -514,35 +515,95 @@ public class AudioEngine : MonoBehaviour
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L1 to L2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[0] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[0, 0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L2 to L3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[1] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[1, 0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L3 to L4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[2] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[2, 0] = tempMusicObj.GetComponent<AudioSource>();
 
-        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L4 to L5", typeof(GameObject)) as GameObject);
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L4 to L5 (1)", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[3] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[3, 0] = tempMusicObj.GetComponent<AudioSource>();
 
-        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L5 to L6", typeof(GameObject)) as GameObject);
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L4 to L5 (2)", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[4] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[3, 1] = tempMusicObj.GetComponent<AudioSource>();
 
-        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L6 to L7", typeof(GameObject)) as GameObject);
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L4 to L5 (3)", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[5] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[3, 2] = tempMusicObj.GetComponent<AudioSource>();
 
-        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8", typeof(GameObject)) as GameObject);
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L4 to L5 (4)", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[6] = tempMusicObj.GetComponent<AudioSource>();
+        transitions[3, 3] = tempMusicObj.GetComponent<AudioSource>();
 
-        /*tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8", typeof(GameObject)) as GameObject);
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L5 to L6 (1)", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        transitions[7] = tempMusicObj.GetComponent<AudioSource>();*/
+        transitions[4, 0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L5 to L6 (2)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[4, 1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L5 to L6 (3)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[4, 2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L5 to L6 (4)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[4, 3] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L6 to L7 (1)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[5, 0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L6 to L7 (2)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[5, 1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L6 to L7 (3)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[5, 2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L6 to L7 (4)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[5, 3] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8 (1)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[6, 0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8 (2)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[6, 1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8 (3)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[6, 2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8 (4)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[6, 3] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8 (1)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[7, 0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8 (2)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[7, 1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8 (3)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[7, 2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8 (4)", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[7, 3] = tempMusicObj.GetComponent<AudioSource>();
     }
 
     private static void LoadLevelMusic()
@@ -601,10 +662,11 @@ public class AudioEngine : MonoBehaviour
                 levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
-                levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
                 varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
+
+                levelCount = 0;
             break;
 
             case 5:
@@ -617,7 +679,6 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL5FdMusic();
                 level = GameBoard.level;
 
-                levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
                 varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
@@ -633,7 +694,6 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL6FdMusic();
                 level = GameBoard.level;
 
-                levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
                 varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
@@ -649,7 +709,6 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL7FdMusic();
                 level = GameBoard.level;
 
-                levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
                 varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
@@ -664,7 +723,6 @@ public class AudioEngine : MonoBehaviour
                 levelMusic = LoadL8Music();
                 levelFdMusic = LoadL8FdMusic();
 
-                levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
                 varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
@@ -677,7 +735,6 @@ public class AudioEngine : MonoBehaviour
     {
         Debug.Log("Updating to new level.");
         LoadLevelMusic(); // Loads the music for the next level.
-        levelCount = 0; // Initialises the music to the first clip/variation.
 
         float startingPoint = 0;
 
@@ -688,7 +745,7 @@ public class AudioEngine : MonoBehaviour
         }
         else if (level > 4)
         {
-            startingPoint = levelMusic[levelCount].clip.length / 2; // (if we're in level 5 onwards, we want to start from the middle of the variation)
+            startingPoint = 4 * levelMusic[levelCount].clip.length / levelMusic[levelCount].GetComponent<MusicSource>().bars; // (if we're in level 5 onwards, we want to start from bar 4)
         }
         else
         {
@@ -699,7 +756,7 @@ public class AudioEngine : MonoBehaviour
         transitioning = false;
     }
 
-    private void Update()
+    private void FixedUpdate()
     {
         if (!variations) // If we're not past level 3.
         {
@@ -725,7 +782,7 @@ public class AudioEngine : MonoBehaviour
     {
         if (!transitioning)
         {
-            varTimer += Time.deltaTime; // Add the time of the last frame to the variation timer.
+            varTimer += Time.fixedDeltaTime; // Add the time of the last frame to the variation timer.
         }
 
         if (varTimer >= varTime) // Is it time to schedule a new variation?
@@ -756,22 +813,22 @@ public class AudioEngine : MonoBehaviour
         {
             if (levelMusic[levelCount].GetComponent<MusicSource>().IsInEvenBar()) // If we're in an even bar.
             {
-                SwapSongAfter(transitions[level - 1], 1, 0); // Finish the bar and start the transition from the beginning.
+                SwapSongAfter(transitions[level - 1, 0], 1, 0); // Finish the bar and start the transition from the beginning.
             }
             else // If we're in an odd bar.
             {
-                SwapSongAfter(transitions[level - 1], 1, transitions[level - 1].clip.length / 4f); // Finish the bar and start the transition from bar 2.
+                SwapSongAfter(transitions[level - 1, 0], 1, transitions[level - 1, 0].clip.length / transitions[level - 1, 0].GetComponent<MusicSource>().bars); // Finish the bar and start the transition from bar 2.
             }
         }
         else // If we're doing 8-bar variations/
         {
             if (levelMusic[levelCount].GetComponent<MusicSource>().IsInEvenBar()) // If we're in in an even bar.
             {
-                SwapSongAfter(transitions[level - 1], 1, 0); // Finish the bar and transition.
+                SwapSongAfter(transitions[level - 1, levelCount], 1, 0); // Finish the bar and transition.
             }
             else // If we're in an odd bar.
             {
-                SwapSongAfter(transitions[level - 1], 2, 0); // Finish the current bar and the next and then transition.
+                SwapSongAfter(transitions[level - 1, levelCount], 2, 0); // Finish the current bar and the next and then transition.
             }
         }
 
@@ -840,39 +897,57 @@ public class AudioEngine : MonoBehaviour
         Debug.Log("Swapping in " + stopTime + " seconds.");
 
         newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
+        ///*StartCoroutine*/Timing.RunCoroutine(StartSongAfter(newSong, stopTime));
         Debug.Log(newSong.name + " is scheduled.");
         newSong.time = startingPoint; // Set the starting point of the scheduled song.
 
-        StartCoroutine(StopSongAfter(currentSong, stopTime)); // Schedule the current song to stop.
+        if (currentSong.GetComponent<MusicSource>().isTransition)
+        {
+            Timing.RunCoroutine(StopSongAfterTransition(currentSong, stopTime));
+        }
+        else
+        {
+            /*StartCoroutine*/
+            Timing.RunCoroutine(StopSongAfter(currentSong, stopTime)); // Schedule the current song to stop.
+        }
     }
 
-    IEnumerator StopSongAfter(AudioSource songIn, float delay)
+    IEnumerator<float> StopSongAfter(AudioSource songIn, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return Timing.WaitForSeconds(delay);
 
         if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
         {
             currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
             Debug.Log("Stopped " + songIn.name);
-            StartCoroutine(FadeMusicOut(songIn, 0.01f)); // Stop the song.
+            /*StartCoroutine*/Timing.RunCoroutine(FadeMusicOut(songIn, 0.2f)); // Stop the song.
         }
     }
 
-    //IEnumerator
-
-    IEnumerator StartSongAfter(AudioSource songIn, float delay)
+    IEnumerator<float> StopSongAfterTransition(AudioSource songIn, float delay)
     {
-        yield return new WaitForSeconds(delay);
+        yield return Timing.WaitForSeconds(delay);
+
+        if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
+        {
+            currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
+            Debug.Log("Stopped " + songIn.name);
+        }
+    }
+
+    IEnumerator<float> StartSongAfter(AudioSource songIn, float delay)
+    {
+        yield return Timing.WaitForSeconds(delay);
 
         if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
         {
             Debug.Log("Started " + songIn.name);
-            StartCoroutine(FadeMusicIn(songIn, 0.01f)); // Stop the song.
+            /*StartCoroutine*/Timing.RunCoroutine(FadeMusicIn(songIn, 0.1f)); // Stop the song.
         }
     }
 
     // Method to fade out music given a fadeTime parameter.
-    IEnumerator FadeMusicOut(AudioSource songIn, float fadeTime)
+    IEnumerator<float> FadeMusicOut(AudioSource songIn, float fadeTime)
     {
         float startVolume = songIn.volume;
 
@@ -880,14 +955,14 @@ public class AudioEngine : MonoBehaviour
         {
             songIn.volume -= startVolume * Time.deltaTime / fadeTime;
 
-            yield return null;
+            yield return 0;
         }
 
         songIn.Stop();
         songIn.volume = startVolume;
     }
 
-    IEnumerator FadeMusicIn(AudioSource songIn, float fadeTime)
+    IEnumerator<float> FadeMusicIn(AudioSource songIn, float fadeTime)
     {
         float startVolume = songIn.volume;
         songIn.volume = 0;
@@ -895,9 +970,9 @@ public class AudioEngine : MonoBehaviour
 
         while (songIn.volume < startVolume)
         {
-            songIn.volume -= startVolume * Time.deltaTime / fadeTime;
+            songIn.volume += startVolume * Time.deltaTime / fadeTime;
 
-            yield return null;
+            yield return 0;
         }
 
         songIn.volume = startVolume;

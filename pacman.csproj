@@ -297,6 +297,7 @@
     <Compile Include="Assets\Scripts\Game\Node.cs" />
     <Compile Include="Assets\Scripts\Game\PacmanController.cs" />
     <Compile Include="Assets\Scripts\Game\Tile.cs" />
+    <Compile Include="Assets\Scripts\Game\Timing.cs" />
     <Compile Include="Assets\Scripts\UI\GameMenu.cs" />
     <Compile Include="Assets\Scripts\UI\Lives.cs" />
     <Compile Include="Assets\Scripts\UI\Score.cs" />

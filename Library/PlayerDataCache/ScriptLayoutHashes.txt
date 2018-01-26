@@ -155,3 +155,4 @@ c2275a8bfbb9f9942cad75ecdfded41d UnityEngine.HoloLens.dll:UnityEngine.XR.WSA.Spa
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.HighScore
 05524b8f659e7bfe5756d1335fec24ba Assembly-CSharp.dll:.BonusItem
 2490be5ae852602bc32382fe40327899 Assembly-CSharp.dll:.Node
+e98c2dbb5095f4bacc64dd493ef0edce Assembly-CSharp.dll:MEC.Timing
