@@ -37,6 +37,7 @@ public class PacmanController : MonoBehaviour
         ChangePosition(playerDirection);
     }
 
+    // Sets the difficulty (speed) based on what the level is.
     private void SetDifficulty()
     {
         Level currentLevel = GameBoard.levels[GameBoard.level - 1];
@@ -44,6 +45,7 @@ public class PacmanController : MonoBehaviour
         playerSpeed = currentLevel.GetPacmanSpeed();
     }
 
+    // Restarts Pacman's state.
     public void Restart()
     {
         SetDifficulty();
@@ -201,6 +203,8 @@ public class PacmanController : MonoBehaviour
             {
                 if (tile.isPowerPill)
                 {
+                    AudioEngine.PlayGhostEat();
+
                     for (int i = 0; i < ghosts.Length; i++)
                     {
                         ghosts[i].GetComponent<GhostController>().EnterFrightenedMode();

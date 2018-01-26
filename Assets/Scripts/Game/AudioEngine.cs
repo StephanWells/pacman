@@ -10,14 +10,16 @@ public class AudioEngine : MonoBehaviour
 
     private static AudioSource consumeSFX;
     private static AudioSource startSFX;
+    private static AudioSource deathSFX;
+    private static AudioSource ghostEatSFX;
     public static AudioSource[] levelMusic;
+    public static AudioSource[] levelFdMusic;
+    public static AudioSource[] levelDeath;
     public static AudioSource[] transitions;
 
-    private static float stopTimer = 0;
-    private static float stopTime = 0;
-    private static float varTimer = 0;
-    private static float varTime = 0;
-    private static bool needToStop = false;
+    private static float stopTime;
+    private static float varTimer;
+    private static float varTime;
     private static bool variations = false;
     private static bool transitioning = false;
 
@@ -38,6 +40,16 @@ public class AudioEngine : MonoBehaviour
         startSFX.Play();
     }
 
+    public static void PlayDeath()
+    {
+        deathSFX.Play();
+    }
+
+    public static void PlayGhostEat()
+    {
+        ghostEatSFX.Play();
+    }
+
     public static void Start()
     {
         audioObj = GameObject.Find("Audio"); // Gets the object that the AudioEngine component is attached to.
@@ -48,6 +60,13 @@ public class AudioEngine : MonoBehaviour
         LoadSoundEffects();
         LoadTransitions();
         LoadLevelMusic();
+
+        // Initialise variables.
+        stopTime = 0;
+        varTimer = 0;
+        varTime = 0;
+        variations = false;
+        transitioning = false;
 
         levelMusic[levelCount].Play(); // Play the first level's initial song.
         currentSong = nextSong = levelMusic[levelCount]; // Initialise currentSong and nextSong values.
@@ -63,190 +82,430 @@ public class AudioEngine : MonoBehaviour
         GameObject startObj = Instantiate(Resources.Load("Prefabs/Sound Effects/StartGame", typeof(GameObject)) as GameObject);
         startObj.transform.parent = audioObj.transform;
         startSFX = startObj.GetComponent<AudioSource>();
+
+        GameObject deathObj = Instantiate(Resources.Load("Prefabs/Sound Effects/Death", typeof(GameObject)) as GameObject);
+        deathObj.transform.parent = audioObj.transform;
+        deathSFX = deathObj.GetComponent<AudioSource>();
+
+        GameObject ghostEatObj = Instantiate(Resources.Load("Prefabs/Sound Effects/GhostEating 110BPM", typeof(GameObject)) as GameObject);
+        ghostEatObj.transform.parent = audioObj.transform;
+        ghostEatSFX = ghostEatObj.GetComponent<AudioSource>();
     }
 
     private static AudioSource[] LoadL1Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L1music = new AudioSource[4];
+        AudioSource[] L1Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/regular/L1-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L1music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L1Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/regular/L1-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L1music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L1Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/regular/L1-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L1music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L1Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/regular/L1-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L1music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L1Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L1music;
+        return L1Music;
+    }
+
+    private static AudioSource[] LoadL1FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L1FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/fd/L1-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L1FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/fd/L1-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L1FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/fd/L1-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L1FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1/fd/L1-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L1FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L1FdMusic;
     }
 
     private static AudioSource[] LoadL2Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L2music = new AudioSource[4];
+        AudioSource[] L2Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/regular/L2-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L2music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L2Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/regular/L2-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L2music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L2Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/regular/L2-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L2music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L2Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/regular/L2-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L2music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L2Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L2music;
+        return L2Music;
+    }
+
+    private static AudioSource[] LoadL2FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L2FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/fd/L2-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L2FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/fd/L2-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L2FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/fd/L2-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L2FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L2/fd/L2-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L2FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L2FdMusic;
     }
 
     private static AudioSource[] LoadL3Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L3music = new AudioSource[2];
+        AudioSource[] L3Music = new AudioSource[2];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L3/regular/L3-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L3music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L3Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L3/regular/L3-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L3music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L3Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L3music;
+        return L3Music;
+    }
+
+    private static AudioSource[] LoadL3FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L3FdMusic = new AudioSource[2];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L3/fd/L3-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L3FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L3/fd/L3-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L3FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L3FdMusic;
     }
 
     private static AudioSource[] LoadL4Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L4music = new AudioSource[4];
+        AudioSource[] L4Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/regular/L4-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L4music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L4Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/regular/L4-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L4music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L4Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/regular/L4-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L4music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L4Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/regular/L4-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L4music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L4Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L4music;
+        return L4Music;
+    }
+
+    private static AudioSource[] LoadL4FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L4FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/fd/L4-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L4FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/fd/L4-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L4FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/fd/L4-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L4FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L4/fd/L4-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L4FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L4FdMusic;
     }
 
     private static AudioSource[] LoadL5Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L5music = new AudioSource[4];
+        AudioSource[] L5Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/regular/L5-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L5music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L5Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/regular/L5-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L5music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L5Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/regular/L5-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L5music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L5Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/regular/L5-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L5music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L5Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L5music;
+        return L5Music;
+    }
+
+    private static AudioSource[] LoadL5FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L5FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/fd/L5-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L5FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/fd/L5-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L5FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/fd/L5-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L5FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L5/fd/L5-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L5FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L5FdMusic;
     }
 
     private static AudioSource[] LoadL6Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L6music = new AudioSource[4];
+        AudioSource[] L6Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/regular/L6-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L6music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L6Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/regular/L6-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L6music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L6Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/regular/L6-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L6music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L6Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/regular/L6-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L6music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L6Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L6music;
+        return L6Music;
+    }
+
+    private static AudioSource[] LoadL6FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L6FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/fd/L6-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L6FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/fd/L6-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L6FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/fd/L6-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L6FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L6/fd/L6-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L6FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L6FdMusic;
     }
 
     private static AudioSource[] LoadL7Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L7music = new AudioSource[4];
+        AudioSource[] L7Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/regular/L7-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L7music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L7Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/regular/L7-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L7music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L7Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/regular/L7-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L7music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L7Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/regular/L7-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L7music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L7Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L7music;
+        return L7Music;
+    }
+
+    private static AudioSource[] LoadL7FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L7FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/fd/L7-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L7FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/fd/L7-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L7FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/fd/L7-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L7FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L7/fd/L7-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L7FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L7FdMusic;
     }
 
     private static AudioSource[] LoadL8Music()
     {
         GameObject tempMusicObj;
-        AudioSource[] L8music = new AudioSource[4];
+        AudioSource[] L8Music = new AudioSource[4];
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/regular/L8-1", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L8music[0] = tempMusicObj.GetComponent<AudioSource>();
+        L8Music[0] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/regular/L8-2", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L8music[1] = tempMusicObj.GetComponent<AudioSource>();
+        L8Music[1] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/regular/L8-3", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L8music[2] = tempMusicObj.GetComponent<AudioSource>();
+        L8Music[2] = tempMusicObj.GetComponent<AudioSource>();
 
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/regular/L8-4", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
-        L8music[3] = tempMusicObj.GetComponent<AudioSource>();
+        L8Music[3] = tempMusicObj.GetComponent<AudioSource>();
 
-        return L8music;
+        return L8Music;
+    }
+
+    private static AudioSource[] LoadL8FdMusic()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] L8FdMusic = new AudioSource[4];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/fd/L8-1_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L8FdMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/fd/L8-2_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L8FdMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/fd/L8-3_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L8FdMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L8/fd/L8-4_fd", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        L8FdMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        return L8FdMusic;
+    }
+
+    private static AudioSource[] LoadL1ToL4Death()
+    {
+        GameObject tempMusicObj;
+        AudioSource[] deathMusic = new AudioSource[10];
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Pluck", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[0] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Pluck2", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[1] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Pad", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[2] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Pulse", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[3] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Sine", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[4] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Square", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[5] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/Bass", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[6] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/DrumsLow", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[7] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/DrumsMid", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[8] = tempMusicObj.GetComponent<AudioSource>();
+
+        tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/L1-L4 death/DrumsHigh", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        deathMusic[9] = tempMusicObj.GetComponent<AudioSource>();
+
+        return deathMusic;
     }
 
     private static void LoadTransitions()
@@ -294,6 +553,8 @@ public class AudioEngine : MonoBehaviour
         {
             case 1:
                 levelMusic = LoadL1Music();
+                levelFdMusic = LoadL1FdMusic();
+                levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -306,6 +567,8 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL2Music();
+                levelFdMusic = LoadL2FdMusic();
+                levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -318,6 +581,8 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL3Music();
+                levelFdMusic = LoadL3FdMusic();
+                levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -332,6 +597,8 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL4Music();
+                levelFdMusic = LoadL4FdMusic();
+                levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -347,6 +614,7 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL5Music();
+                levelFdMusic = LoadL5FdMusic();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -362,6 +630,7 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL6Music();
+                levelFdMusic = LoadL6FdMusic();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -377,6 +646,7 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL7Music();
+                levelFdMusic = LoadL7FdMusic();
                 level = GameBoard.level;
 
                 levelCount = 0;
@@ -392,7 +662,7 @@ public class AudioEngine : MonoBehaviour
                 }
 
                 levelMusic = LoadL8Music();
-                level = GameBoard.level;
+                levelFdMusic = LoadL8FdMusic();
 
                 levelCount = 0;
                 varTimer = 0 - (nextSong.clip.length - nextSong.time);
@@ -453,7 +723,10 @@ public class AudioEngine : MonoBehaviour
 
     public void PlayVariation()
     {
-        varTimer += Time.deltaTime; // Add the time of the last frame to the variation timer.
+        if (!transitioning)
+        {
+            varTimer += Time.deltaTime; // Add the time of the last frame to the variation timer.
+        }
 
         if (varTimer >= varTime) // Is it time to schedule a new variation?
         {
@@ -505,6 +778,49 @@ public class AudioEngine : MonoBehaviour
         return stopTime;
     }
 
+    public void DeathStart()
+    {
+        transitioning = true;
+        StopAllCoroutines();
+        Debug.Log("Current: " + currentSong.name + ". Next: " + nextSong.name);
+        currentSong.Stop();
+        nextSong.Stop();
+        PlayDeath();
+    }
+
+    public float Death()
+    {
+        bool[] boolArray = currentSong.GetComponent<MusicSource>().GetBoolArray();
+        bool variation = currentSong.GetComponent<MusicSource>().isVariation;
+
+        for (int i = 0; i < levelDeath.Length; i++)
+        {
+            if (boolArray[i] || variation)
+            {
+                levelDeath[i].Play();
+            }
+        }
+
+        return levelDeath[0].clip.length;
+    }
+
+    public float AfterDeath()
+    {
+        varTimer = 0;
+        transitioning = false;
+        currentSong = nextSong = levelFdMusic[levelCount];
+        currentSong.Play();
+
+        if (!variations)
+        {
+            SwapSongAfter(levelMusic[levelCount], currentSong.GetComponent<MusicSource>().bars, 0);
+        }
+
+        varTime = currentSong.clip.length - variationPreparationTime;
+
+        return currentSong.GetComponent<MusicSource>().timePerBar;
+    }
+
     // Schedules the current track to stop and the next track to start.
     public void SwapSongAfter(AudioSource newSong, int bars, float startingPoint)
     {
@@ -520,9 +836,13 @@ public class AudioEngine : MonoBehaviour
         nextSong = newSong; // Set the scheduled song.
 
         stopTime = currentSong.GetComponent<MusicSource>().GetTimeUntilBarsEnd(bars); // Set how long the program will need to wait till we swap songs.
+
+        Debug.Log("Swapping in " + stopTime + " seconds.");
+
         newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
         Debug.Log(newSong.name + " is scheduled.");
         newSong.time = startingPoint; // Set the starting point of the scheduled song.
+
         StartCoroutine(StopSongAfter(currentSong, stopTime)); // Schedule the current song to stop.
     }
 
@@ -534,12 +854,25 @@ public class AudioEngine : MonoBehaviour
         {
             currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
             Debug.Log("Stopped " + songIn.name);
-            StartCoroutine(FadeMusic(songIn, 0.01f)); // Stop the song.
+            StartCoroutine(FadeMusicOut(songIn, 0.01f)); // Stop the song.
+        }
+    }
+
+    //IEnumerator
+
+    IEnumerator StartSongAfter(AudioSource songIn, float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
+        {
+            Debug.Log("Started " + songIn.name);
+            StartCoroutine(FadeMusicIn(songIn, 0.01f)); // Stop the song.
         }
     }
 
     // Method to fade out music given a fadeTime parameter.
-    IEnumerator FadeMusic(AudioSource songIn, float fadeTime)
+    IEnumerator FadeMusicOut(AudioSource songIn, float fadeTime)
     {
         float startVolume = songIn.volume;
 
@@ -551,6 +884,22 @@ public class AudioEngine : MonoBehaviour
         }
 
         songIn.Stop();
+        songIn.volume = startVolume;
+    }
+
+    IEnumerator FadeMusicIn(AudioSource songIn, float fadeTime)
+    {
+        float startVolume = songIn.volume;
+        songIn.volume = 0;
+        songIn.Play();
+
+        while (songIn.volume < startVolume)
+        {
+            songIn.volume -= startVolume * Time.deltaTime / fadeTime;
+
+            yield return null;
+        }
+
         songIn.volume = startVolume;
     }
 }

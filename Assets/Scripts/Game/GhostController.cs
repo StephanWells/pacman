@@ -40,6 +40,7 @@ public class GhostController : MonoBehaviour
     private Vector2 ghostDirection, nextDirection;
     private Node currentNode, previousNode, targetNode;
 
+    // Called when the game starts.
     void Start()
     {
         pacMan = GameObject.Find("Pacman");
@@ -58,28 +59,32 @@ public class GhostController : MonoBehaviour
         targetNode = ChooseNextNode();
     }
 
+    // Sets the difficulty of the ghosts.
     private void SetDifficulty()
     {
         Level currentLevel = GameBoard.levels[GameBoard.level - 1];
 
-        ghostSpeed = currentLevel.GetGhostSpeed();
-        frightenedTime = currentLevel.GetGhostFrightenedTime();
-        frightenedSlow = currentLevel.GetGhostFrightenedSlow();
-        recoveryFactor = currentLevel.GetGhostRecoveryFactor();
+        ghostSpeed = currentLevel.GetGhostSpeed(); // How fast the ghost is.
+        frightenedTime = currentLevel.GetGhostFrightenedTime(); // How long it spends in frightened mode.
+        frightenedSlow = currentLevel.GetGhostFrightenedSlow(); // How slow it is in frightened mode.
+        recoveryFactor = currentLevel.GetGhostRecoveryFactor(); // How fast it is in recovery mode.
 
         modes = currentLevel.GetDefaultGhostModes();
         timers = currentLevel.GetGhostTimers(ghost);
 
+        // Scatter behaviour timers.
         timers[1] = 7; modes[1] = Mode.SCATTER;
         timers[3] = 7; modes[3] = Mode.SCATTER;
         timers[5] = 5; modes[5] = Mode.SCATTER;
         timers[7] = 5; modes[7] = Mode.SCATTER;
 
+        // Chase behaviour timers.
         timers[2] = 20; modes[2] = Mode.CHASE;
         timers[4] = 20; modes[4] = Mode.CHASE;
         timers[6] = 20; modes[6] = Mode.CHASE;   
     }
 
+    // Resets all ghost variables.
     public void Restart()
     {
         SetDifficulty();
@@ -102,6 +107,7 @@ public class GhostController : MonoBehaviour
         targetNode = ChooseNextNode();
     }
 
+    // Called every tick.
 	void Update()
     {
         if (canMove)
@@ -112,6 +118,7 @@ public class GhostController : MonoBehaviour
         }
     }
 
+    // Method that moves the ghost in its direction.
     void Move()
     {
         if (targetNode != currentNode && targetNode != null)
@@ -145,14 +152,16 @@ public class GhostController : MonoBehaviour
         animator.SetAnimatorState(ghostState);
     }
 
+    // Chooses which movement node to go to next based on the target tile.
     Node ChooseNextNode()
     {
-        Vector2 targetTile = GetTargetTile();
+        Vector2 targetTile = GetTargetTile(); // Get the ghost's unique target tile.
         Node moveToNode = null;
 
         List<Node> foundNodes = new List<Node>();
         List<Vector2> foundNodeDirections = new List<Vector2>();
         
+        // Get all the nodes the ghost can move to.
         for (int i = 0; i < currentNode.neighbouringNodes.Length; i++)
         {
             Vector2 tempDir = currentNode.validDirections[i];
@@ -166,12 +175,12 @@ public class GhostController : MonoBehaviour
             }
         }
 
-        if (foundNodes.Count == 1)
+        if (foundNodes.Count == 1) // If it can only go to one node.
         {
             moveToNode = foundNodes[0];
             ghostDirection = foundNodeDirections[0];
         }
-        else if (foundNodes.Count >= 1)
+        else if (foundNodes.Count >= 1) // If it has multiple nodes to choose from, then choose the node with the least distance to the target tile.
         {
             float leastDistance = float.MaxValue;
 
@@ -200,7 +209,7 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
-    // Pinky goes four tiles ahead of Pacman.
+    // Pinky aims four tiles ahead of Pacman.
     Vector2 GetPinkyChaseTile()
     {
         Vector2 pacmanPosition = pacMan.transform.position;
@@ -243,21 +252,25 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
+    // Each ghost has its own home node.
     Vector2 GetGhostScatterTile()
     {
         return gameBoard.WorldToBoard(homeNode.transform.position);
     }
 
+    // Figures out what target tile each individual ghost wants to aim for.
     public Vector2 GetTargetTile()
     {
         Vector2 targetTile = Vector2.zero;
 
         switch (currentMode)
         {
+            // Scattering ghosts hang around their home node.
             case Mode.SCATTER:
                 targetTile = GetGhostScatterTile();
             break;
 
+            // Each ghost has its own unique behaviour.
             case Mode.CHASE:
                 switch (ghost)
                 {
@@ -278,15 +291,18 @@ public class GhostController : MonoBehaviour
                     break;
                 }
             break;
-
+            
+            // Frightened ghosts just run to their home node.
             case Mode.FRIGHTENED:
                 targetTile = GetGhostScatterTile();
             break;
-
+            
+            // Aim for the ghost house when the ghost wants to recover.
             case Mode.RECOVERY:
                 targetTile = gameBoard.WorldToBoard(ghostHouse.transform.position);
             break;
-
+            
+            // Stay still when idle.
             case Mode.IDLE:
                 targetTile = gameBoard.WorldToBoard(this.transform.position);
             break;
@@ -295,24 +311,25 @@ public class GhostController : MonoBehaviour
         return targetTile;
     }
 
+    // Method for updating the behaviour of each ghost.
     void ModeUpdate()
     {
-        if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY)
+        if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY) // If ghosts are not in modes that interrupt their normal behaviour.
         {
-            modeChangeTimer += Time.deltaTime;
+            modeChangeTimer += Time.deltaTime; // Increment the behaviour timer.
 
-            if (stateIteration == 1)
+            if (stateIteration == 1) // If the ghost has exited idle state.
             {
                 ghostState = AnimationController.State.MOVING;
             }
 
-            if (stateIteration == timers.Length)
+            if (stateIteration == timers.Length) // If the ghost has entered permanent chase state.
             {
                 ChangeMode(modes[timers.Length]);
             }
             else
             {
-                if (modeChangeTimer > timers[stateIteration])
+                if (modeChangeTimer > timers[stateIteration]) // If it's time to change modes.
                 {
                     stateIteration++;
                     modeChangeTimer = 0;
@@ -343,6 +360,7 @@ public class GhostController : MonoBehaviour
         }
     }
 
+    // Method to change to a given mode.
     void ChangeMode(Mode mode)
     {
         if (currentMode != Mode.FRIGHTENED && currentMode != Mode.RECOVERY)
@@ -353,6 +371,7 @@ public class GhostController : MonoBehaviour
         currentMode = mode;
     }
 
+    // Checks if the ghost collided with Pacman using box collision detection.
     void CheckCollision()
     {
         Rect ghostRect = new Rect(this.transform.position, this.transform.GetComponent<SpriteRenderer>().sprite.bounds.size * 0.5f);
@@ -371,6 +390,7 @@ public class GhostController : MonoBehaviour
         }
     }
 
+    // Called when a ghost is eaten by Pacman.
     void Consume()
     {
         AudioEngine.PlayConsume();
@@ -380,6 +400,7 @@ public class GhostController : MonoBehaviour
         EnterRecoveryMode();
     }
 
+    // Enters the frightened state after a power pill is eaten.
     public void EnterFrightenedMode()
     {
         if (currentMode != Mode.IDLE && currentMode != Mode.RECOVERY)
@@ -393,11 +414,13 @@ public class GhostController : MonoBehaviour
         }
     }
 
+    // Enter blinking state indicating frightened mode is nearly over.
     public void EnterFrightened2Mode()
     {
         ghostState = AnimationController.State.FRIGHTENED2;
     }
 
+    // Enters the recovery state (eyes) after being eaten.
     public void EnterRecoveryMode()
     {
         ChangeMode(Mode.RECOVERY);
@@ -405,6 +428,7 @@ public class GhostController : MonoBehaviour
         frightenedFactor = recoveryFactor;
     }
 
+    // Exits the frightened state and reverts the ghosts to normal.
     void ExitFrightenedMode()
     {
         ChangeMode(previousMode);
@@ -412,6 +436,7 @@ public class GhostController : MonoBehaviour
         frightenedFactor = 1f;
     }
 
+    // Exits the recovery state and reverts the ghosts to normal.
     void ExitRecoveryMode()
     {
         modeChangeTimer = 0;
@@ -421,6 +446,7 @@ public class GhostController : MonoBehaviour
         frightenedFactor = 1f;
     }
 
+    // Booleans for checking whether the ghosts are in or leaving the ghost house in the middle.
     bool IsInGhostHouse()
     {
         return currentNode.name.Equals("StartNodePinky") || currentNode.name.Equals("StartNodeInky") || currentNode.name.Equals("StartNodeClyde");
@@ -431,6 +457,7 @@ public class GhostController : MonoBehaviour
         return previousNode.name.Equals("StartNodePinky") || previousNode.name.Equals("StartNodeInky") || previousNode.name.Equals("StartNodeClyde");
     }
 
+    // Reverse the direction of the ghost (called when a power pill is eaten).
     void ReverseDirection()
     {
         if (!IsLeavingInGhostHouse())
@@ -444,6 +471,7 @@ public class GhostController : MonoBehaviour
         }
     }
 
+    // Pauses all ghost and temporarily disables the sprite for the one that got eaten.
     IEnumerator Pause(float delay)
     {
         this.GetComponent<SpriteRenderer>().enabled = false;
@@ -467,6 +495,7 @@ public class GhostController : MonoBehaviour
         Resume();
     }
 
+    // Allows ghosts to move again after a pause.
     void Resume()
     {
         this.GetComponent<SpriteRenderer>().enabled = true;

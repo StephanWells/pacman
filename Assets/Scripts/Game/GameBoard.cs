@@ -76,6 +76,11 @@ public class GameBoard : MonoBehaviour
         didSpawnBonusItem1 = false;
         didSpawnBonusItem2 = false;
 
+        if (bonusItem != null)
+        {
+            Destroy(bonusItem.gameObject);
+        }
+
         StartGame();
 	}
 
@@ -186,10 +191,12 @@ public class GameBoard : MonoBehaviour
         if (bonusItem != null)
         {
             Destroy(bonusItem.gameObject);
+            bonusItem = null;
         }
 
         Lives.LoseALife();
         Lives.UpdateLives();
+        audioEngine.DeathStart();
 
         GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
 
@@ -216,7 +223,9 @@ public class GameBoard : MonoBehaviour
             ghost.GetComponent<SpriteRenderer>().enabled = false;
         }
 
-        StartCoroutine(ProcessDeathAnimation(2.1f));
+        float songDelay = audioEngine.Death();
+
+        StartCoroutine(ProcessDeathAnimation(songDelay));
     }
 
     IEnumerator ProcessDeathAnimation(float delay)
@@ -244,7 +253,8 @@ public class GameBoard : MonoBehaviour
             readyText.GetComponent<Text>().color = new Color(1, 1, 0);
             readyText.GetComponent<Text>().enabled = true;
 
-            StartCoroutine(ProcessStart(1.5f));
+            float songDelay = audioEngine.AfterDeath();
+            StartCoroutine(ProcessStart(songDelay));
         }
     }
 

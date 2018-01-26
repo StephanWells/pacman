@@ -8,22 +8,22 @@ public class BonusItem : MonoBehaviour
     private float currentLifeTime;
     private GameBoard gameBoard;
 
-	void Start ()
+	void Start()
     {
-        timer = Random.Range(9, 10);
+        timer = Random.Range(9f, 10f);
         currentLifeTime = 0f;
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         this.name = "BonusItem";
         gameBoard.consumables[14, 13] = this.gameObject;
 	}
 
-	void Update ()
+	void Update()
     {
-		if (currentLifeTime < timer)
+		if (currentLifeTime < timer && !this.gameObject.GetComponent<Tile>().consumed)
         {
             currentLifeTime += Time.deltaTime;
         }
-        else
+        else if (currentLifeTime >= timer)
         {
             Destroy(this.gameObject);
         }

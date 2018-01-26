@@ -8219,7 +8219,7 @@ GameObject:
   - component: {fileID: 647173589}
   m_Layer: 0
   m_Name: Ghosts
-  m_TagString: EditorOnly
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -16941,7 +16941,7 @@ GameObject:
   - component: {fileID: 1380021909}
   m_Layer: 5
   m_Name: UI
-  m_TagString: EditorOnly
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -17758,7 +17758,7 @@ GameObject:
   - component: {fileID: 1461926118}
   m_Layer: 0
   m_Name: Maze Parts
-  m_TagString: EditorOnly
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

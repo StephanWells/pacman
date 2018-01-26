@@ -24,11 +24,18 @@ public class MusicSource : MonoBehaviour
     public bool drumsMid;
     public bool drumsHigh;
 
-    private float timePerBar;
+    public float timePerBar;
 
     private void Start()
     {
         timePerBar = 4f * (60f / (float)BPM);
+    }
+
+    public bool[] GetBoolArray()
+    {
+        bool[] boolArray = { pluck, pluck2, pad, pulse, sine, square, bass, drumsLow, drumsMid, drumsHigh };
+
+        return boolArray;
     }
 
     public float GetTimeUntilBarsEnd(int bars)
