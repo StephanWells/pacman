@@ -38,7 +38,7 @@ public class MusicSource : MonoBehaviour
 
     public int CurrentBar()
     {
-        return Mathf.FloorToInt(this.GetComponent<AudioSource>().time / timePerBar);
+        return Mathf.FloorToInt(this.GetComponent<AudioSource>().time / timePerBar) + 1;
     }
 
     public bool IsInEvenBar()

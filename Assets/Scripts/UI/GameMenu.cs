@@ -8,8 +8,15 @@ public class GameMenu : MonoBehaviour
 {
     private bool isPaused = false;
     private float timer = 0;
+    GameObject introObj;
+    GameObject startObj;
 
-	void Update()
+    void Start()
+    {
+        PlayIntro();
+    }
+
+    void Update()
     {
 		if (Input.anyKey || isPaused)
         {
@@ -32,9 +39,22 @@ public class GameMenu : MonoBehaviour
 
     void PlayStart()
     {
-        GameObject startObj = Instantiate(Resources.Load("Prefabs/Sound Effects/StartGame", typeof(GameObject)) as GameObject);
+        startObj = Instantiate(Resources.Load("Prefabs/Sound Effects/StartGame", typeof(GameObject)) as GameObject);
         AudioSource startSFX = startObj.GetComponent<AudioSource>();
 
+        if (introObj.GetComponent<AudioSource>().isPlaying)
+        {
+            introObj.GetComponent<AudioSource>().Stop();
+        }
+
         startSFX.Play();
+    }
+
+    void PlayIntro()
+    {
+        introObj = Instantiate(Resources.Load("Prefabs/Sound Effects/Intro", typeof(GameObject)) as GameObject);
+        AudioSource introSFX = introObj.GetComponent<AudioSource>();
+
+        introSFX.Play();
     }
 }

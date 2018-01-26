@@ -18,6 +18,7 @@ public class Score : MonoBehaviour
         if (scoreTemp >= 10000)
         {
             Lives.AddALife();
+            Lives.UpdateLives();
             scoreTemp = 0;
         }
 	}

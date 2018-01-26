@@ -10,16 +10,25 @@ public class Lives : MonoBehaviour
     
     public const int defaultLives = 3;
     public static int pacmanLives = defaultLives;
+    static GameObject[] lives;
 
-    public void UpdateLives()
+    void Start()
     {
-        if (pacmanLives < (int)life)
+        lives = GameObject.FindGameObjectsWithTag("Life");
+    }
+
+    public static void UpdateLives()
+    {
+        foreach (GameObject lifeObj in lives)
         {
-            this.GetComponent<Image>().enabled = false;
-        }
-        else
-        {
-            this.GetComponent<Image>().enabled = true;
+            if (pacmanLives < (int)lifeObj.GetComponent<Lives>().life)
+            {
+                lifeObj.GetComponent<Image>().enabled = false;
+            }
+            else
+            {
+                lifeObj.GetComponent<Image>().enabled = true;
+            }
         }
     }
 

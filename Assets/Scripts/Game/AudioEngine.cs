@@ -19,17 +19,20 @@ public class AudioEngine : MonoBehaviour
     private static float varTime = 0;
     private static bool needToStop = false;
     private static bool variations = false;
+    private static bool transitioning = false;
 
     private static int level = GameBoard.level;
     private static int levelCount;
-    private static int currentVariation = 0;
-    private static AudioSource oldSong;
+    private static AudioSource currentSong;
+    private static AudioSource nextSong;
 
+    // Plays the sound effect when you consume a ghost / bonus item.
     public static void PlayConsume()
     {
         consumeSFX.Play();
     }
 
+    // Plays the sound effect when you start the game.
     public static void PlayStart()
     {
         startSFX.Play();
@@ -37,18 +40,20 @@ public class AudioEngine : MonoBehaviour
 
     public static void Start()
     {
-        audioObj = GameObject.Find("Audio");
-        DontDestroyOnLoad(audioObj);
+        audioObj = GameObject.Find("Audio"); // Gets the object that the AudioEngine component is attached to.
 
-        transitions = new AudioSource[7];
+        transitions = new AudioSource[8];
 
+        // Load audio.
         LoadSoundEffects();
         LoadTransitions();
         LoadLevelMusic();
 
-        levelMusic[levelCount].Play();
+        levelMusic[levelCount].Play(); // Play the first level's initial song.
+        currentSong = nextSong = levelMusic[levelCount]; // Initialise currentSong and nextSong values.
     }
 
+    // Methods for loading the music and sound effect prefabs.
     private static void LoadSoundEffects()
     {
         GameObject consumeObj = Instantiate(Resources.Load("Prefabs/Sound Effects/Consume", typeof(GameObject)) as GameObject);
@@ -275,15 +280,23 @@ public class AudioEngine : MonoBehaviour
         tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L7 to L8", typeof(GameObject)) as GameObject);
         tempMusicObj.transform.parent = audioObj.transform;
         transitions[6] = tempMusicObj.GetComponent<AudioSource>();
+
+        /*tempMusicObj = Instantiate(Resources.Load("Prefabs/Music/Transitions/L8 to L8", typeof(GameObject)) as GameObject);
+        tempMusicObj.transform.parent = audioObj.transform;
+        transitions[7] = tempMusicObj.GetComponent<AudioSource>();*/
     }
 
     private static void LoadLevelMusic()
     {
+        Debug.Log("Loading Level " + GameBoard.level + " music.");
+
         switch (GameBoard.level)
         {
             case 1:
-                levelCount = 0;
                 levelMusic = LoadL1Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
             break;
 
             case 2:
@@ -292,8 +305,10 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 0;
                 levelMusic = LoadL2Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
             break;
 
             case 3:
@@ -302,8 +317,10 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 0;
                 levelMusic = LoadL3Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
             break;
 
             case 4:
@@ -314,8 +331,12 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 0;
                 levelMusic = LoadL4Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
+                varTimer = 0 - (nextSong.clip.length - nextSong.time);
+                varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
             break;
 
@@ -325,8 +346,12 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 1;
                 levelMusic = LoadL5Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
+                varTimer = 0 - (nextSong.clip.length - nextSong.time);
+                varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
             break;
 
@@ -336,8 +361,12 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 2;
                 levelMusic = LoadL6Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
+                varTimer = 0 - (nextSong.clip.length - nextSong.time);
+                varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
             break;
 
@@ -347,8 +376,12 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 3;
                 levelMusic = LoadL7Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
+                varTimer = 0 - (nextSong.clip.length - nextSong.time);
+                varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
             break;
 
@@ -358,112 +391,154 @@ public class AudioEngine : MonoBehaviour
                     Destroy(audio.gameObject);
                 }
 
-                levelCount = 3;
                 levelMusic = LoadL8Music();
+                level = GameBoard.level;
+
+                levelCount = 0;
+                varTimer = 0 - (nextSong.clip.length - nextSong.time);
+                varTimer = 0;
                 varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
             break;
         }
     }
 
-    public static void UpdateLevel()
+    // Updates the audio engine to the next level.
+    public void UpdateLevel()
     {
-        level = GameBoard.level;
-        LoadLevelMusic();
-        levelCount = 0;
-        SwapSongAfter(transitions[level - 2], levelMusic[levelCount], transitions[level - 2].GetComponent<MusicSource>().bars, 0);
+        Debug.Log("Updating to new level.");
+        LoadLevelMusic(); // Loads the music for the next level.
+        levelCount = 0; // Initialises the music to the first clip/variation.
+
+        float startingPoint = 0;
+
+        // Sets the starting point of the clip.
+        if (level == 4)
+        {
+            startingPoint = levelMusic[levelCount].clip.length / 4; // (if we're in level 4, we want to start from bar 3 of the variation)
+        }
+        else if (level > 4)
+        {
+            startingPoint = levelMusic[levelCount].clip.length / 2; // (if we're in level 5 onwards, we want to start from the middle of the variation)
+        }
+        else
+        {
+            startingPoint = 0; // (if we're in levels 1/2/3, we want to start from the beginning of the clip)
+        }
+
+        SwapSongAfter(levelMusic[levelCount], currentSong.GetComponent<MusicSource>().bars, startingPoint); // Swap to the level's first song.
+        transitioning = false;
     }
 
     private void Update()
     {
-        if (!variations)
+        if (!variations) // If we're not past level 3.
         {
-            CheckPellets();
+            CheckPellets(); // Change clips based on pellet thresholds.
         }
-        else
+        else // If we're past level 3.
         {
-            PlayVariation();
+            PlayVariation(); // Change clips based on choosing a random variation after the current one is done playing.
         }
-        
-        CheckStop();
     }
 
     public void CheckPellets()
     {
-        MusicSource currentSong = levelMusic[levelCount].GetComponent<MusicSource>();
-
-        if (GameBoard.pelletsConsumed > currentSong.pelletsHigh)
+        if (GameBoard.pelletsConsumed > levelMusic[levelCount].GetComponent<MusicSource>().pelletsHigh) // Check pellet threshold.
         {
-            SwapSongAfter(levelMusic[levelCount], levelMusic[levelCount + 1], 2, 0);
+            Debug.Log("Pellets threshold reached!");
             levelCount++;
+            SwapSongAfter(levelMusic[levelCount], 2, 0); // Swap to the next song.
         }
     }
 
     public void PlayVariation()
     {
-        varTimer += Time.deltaTime;
+        varTimer += Time.deltaTime; // Add the time of the last frame to the variation timer.
 
-        if (varTimer >= varTime)
+        if (varTimer >= varTime) // Is it time to schedule a new variation?
         {
-            varTimer = 0 - variationPreparationTime;
-            int rand = Random.Range(0, levelMusic.Length);
+            Debug.Log("Variation timer threshold reached!");
 
-            if (rand == currentVariation)
+            varTimer = 0 - variationPreparationTime; // Reset the variation timer.
+            int rand = Random.Range(0, levelMusic.Length); // Choose a new random index.
+
+            if (rand == levelCount) // If the index is the same as the one we currently have.
             {
-                rand = rand < levelMusic.Length - 1 ? rand + 1 : rand - 1;
+                rand = rand < levelMusic.Length - 1 ? rand + 1 : rand - 1; // Change it.
             }
 
-            SwapSongAfter(levelMusic[currentVariation], levelMusic[rand], levelMusic[currentVariation].GetComponent<MusicSource>().bars, 0);
-            currentVariation = rand;
-            varTime = levelMusic[rand].clip.length - variationPreparationTime;
+            SwapSongAfter(levelMusic[rand], levelMusic[levelCount].GetComponent<MusicSource>().bars, 0); // Schedule the new variation.
+            levelCount = rand; // Set the current index to be the new one.
+            varTime = levelMusic[rand].clip.length - variationPreparationTime; // Set the variation timer threshold to be as long as the next track (minus a preparation time).
         }
     }
 
-    public void CheckStop()
+    // Method called by game board when it's time to transition. Returns how long the game board needs to wait.
+    public float Transition()
     {
-        if (needToStop)
-        {
-            stopTimer += Time.deltaTime;
+        Debug.Log("Transitioning to next level!");
+        transitioning = true;
 
-            if (stopTimer >= stopTime)
+        if (level < 4)
+        {
+            if (levelMusic[levelCount].GetComponent<MusicSource>().IsInEvenBar()) // If we're in an even bar.
             {
-                stopTimer = 0;
-                needToStop = false;
-                StartCoroutine(FadeMusic(oldSong, 0.01f));
+                SwapSongAfter(transitions[level - 1], 1, 0); // Finish the bar and start the transition from the beginning.
+            }
+            else // If we're in an odd bar.
+            {
+                SwapSongAfter(transitions[level - 1], 1, transitions[level - 1].clip.length / 4f); // Finish the bar and start the transition from bar 2.
             }
         }
-    }
-
-    public static float Transition()
-    {
-        //if (levelMusic[levelCount].time >= levelMusic[levelCount].clip.length / 2f)
-        if (!levelMusic[levelCount].GetComponent<MusicSource>().IsInEvenBar())
+        else // If we're doing 8-bar variations/
         {
-            SwapSongAfter(levelMusic[levelCount], transitions[level - 1], 1, 0);
-        }
-        else
-        {
-            SwapSongAfter(levelMusic[levelCount], transitions[level - 1], 1, transitions[level - 1].clip.length / 4f);
+            if (levelMusic[levelCount].GetComponent<MusicSource>().IsInEvenBar()) // If we're in in an even bar.
+            {
+                SwapSongAfter(transitions[level - 1], 1, 0); // Finish the bar and transition.
+            }
+            else // If we're in an odd bar.
+            {
+                SwapSongAfter(transitions[level - 1], 2, 0); // Finish the current bar and the next and then transition.
+            }
         }
 
         return stopTime;
     }
 
-    public static void SwapSongAfter(AudioSource oldSongIn, AudioSource newSong, int bars, float startingPoint)
+    // Schedules the current track to stop and the next track to start.
+    public void SwapSongAfter(AudioSource newSong, int bars, float startingPoint)
     {
-        Debug.Log("Swapping from " + oldSongIn.name + " to " + newSong.name + ".");
+        Debug.Log("Swapping from " + currentSong.name + " to " + newSong.name + ".");
 
-        needToStop = true;
-        oldSong = oldSongIn;
-        stopTime = oldSong.GetComponent<MusicSource>().GetTimeUntilBarsEnd(bars);
-        newSong.PlayScheduled(AudioSettings.dspTime + stopTime);
-        newSong.time = startingPoint;
+        if (nextSong != currentSong) // If there is a song already scheduled.
+        {
+            Debug.Log("Next song " + nextSong.name + " is not equal to current song " + currentSong.name + "!");
+
+            nextSong.Stop(); // Cancel that song.
+        }
+
+        nextSong = newSong; // Set the scheduled song.
+
+        stopTime = currentSong.GetComponent<MusicSource>().GetTimeUntilBarsEnd(bars); // Set how long the program will need to wait till we swap songs.
+        newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
+        Debug.Log(newSong.name + " is scheduled.");
+        newSong.time = startingPoint; // Set the starting point of the scheduled song.
+        StartCoroutine(StopSongAfter(currentSong, stopTime)); // Schedule the current song to stop.
     }
 
-    public static void StopMusic(AudioSource songIn)
+    IEnumerator StopSongAfter(AudioSource songIn, float delay)
     {
-        songIn.Stop();
+        yield return new WaitForSeconds(delay);
+
+        if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
+        {
+            currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
+            Debug.Log("Stopped " + songIn.name);
+            StartCoroutine(FadeMusic(songIn, 0.01f)); // Stop the song.
+        }
     }
 
+    // Method to fade out music given a fadeTime parameter.
     IEnumerator FadeMusic(AudioSource songIn, float fadeTime)
     {
         float startVolume = songIn.volume;
@@ -478,12 +553,4 @@ public class AudioEngine : MonoBehaviour
         songIn.Stop();
         songIn.volume = startVolume;
     }
-
-    /*public static void PlayMusic()
-    {
-        if (!levelMusic[levelCount].isPlaying && canTransition)
-        {
-            levelMusic[levelCount].Play();
-        }
-    }*/
 }

@@ -10,7 +10,7 @@ public class GameBoard : MonoBehaviour
     private const int boardHeight = 29; // Number of units vertically along the Pacman game board.
     private const int pelletsInLevel = 246;
 
-    private GameObject[] lives;
+    private AudioEngine audioEngine;
 
     public static int level = 1;
     public static Level[] levels;
@@ -62,7 +62,7 @@ public class GameBoard : MonoBehaviour
             }
         }
 
-        lives = GameObject.FindGameObjectsWithTag("Life");
+        audioEngine = GameObject.Find("Audio").GetComponent<AudioEngine>();
 
         if (level == 1)
         {
@@ -106,10 +106,7 @@ public class GameBoard : MonoBehaviour
             ghost.GetComponent<GhostController>().canMove = false;
         }
 
-        foreach (GameObject life in lives)
-        {
-            life.GetComponent<Lives>().UpdateLives();
-        }
+        Lives.UpdateLives();
 
         GameObject pacMan = GameObject.Find("Pacman");
 
@@ -192,11 +189,7 @@ public class GameBoard : MonoBehaviour
         }
 
         Lives.LoseALife();
-
-        foreach (GameObject life in lives)
-        {
-            life.GetComponent<Lives>().UpdateLives();
-        }
+        Lives.UpdateLives();
 
         GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
 
@@ -310,7 +303,7 @@ public class GameBoard : MonoBehaviour
         if (pelletsConsumed >= pelletsInLevel)
         {
             pelletsConsumed = 0;
-            float delay = AudioEngine.Transition();
+            float delay = audioEngine.Transition();
             StartCoroutine(ProcessWin(delay));
         }
         else if (pelletsConsumed >= 70 && pelletsConsumed < 170 && !didSpawnBonusItem1)
@@ -396,7 +389,7 @@ public class GameBoard : MonoBehaviour
     private void NextLevel()
     {
         level++;
-        AudioEngine.UpdateLevel();
+        audioEngine.UpdateLevel();
         Start();
 
         GameObject pacMan = GameObject.Find("Pacman");
