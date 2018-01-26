@@ -10,29 +10,27 @@ public class GameBoard : MonoBehaviour
     private const int boardHeight = 29; // Number of units vertically along the Pacman game board.
     private const int pelletsInLevel = 246;
 
-    public static int defaultLives = 3;
-    public static int pacmanLives = defaultLives;
     private GameObject[] lives;
 
     public static int level = 1;
     public static Level[] levels;
 
-    public int totalPellets = 0;
-    public int pelletsConsumed = 0;
+    public static int totalPellets = 0;
+    public static int pelletsConsumed = 0;
 
     public GameObject[,] consumables = new GameObject[boardWidth, boardHeight]; // Locations of the dots and power pills.
     public GameObject[,] nodes = new GameObject[boardWidth, boardHeight]; // Locations of the back-end movement nodes/waypoints.
 
-    GameObject bonusItem = null;
+    GameObject bonusItem;
 
     private bool startDeath = false;
     private bool shouldBlink = false;
 
-    private const float blinkInterval = 0.33f;
-    private float blinkIntervalTimer = 0;
+    private float blinkInterval;
+    private float blinkIntervalTimer;
 
-    private bool didSpawnBonusItem1 = false;
-    private bool didSpawnBonusItem2 = false;
+    private bool didSpawnBonusItem1;
+    private bool didSpawnBonusItem2;
 
     public Sprite mazeBlue;
     public Sprite mazeWhite;
@@ -42,6 +40,7 @@ public class GameBoard : MonoBehaviour
 	void Start()
     {
         Object[] objects = GameObject.FindObjectsOfType(typeof(GameObject));
+        totalPellets = 0;
 
         foreach (GameObject obj in objects)
         {
@@ -52,6 +51,8 @@ public class GameBoard : MonoBehaviour
                 Vector2Int board = WorldToBoard(pos);
                 consumables[board.x, board.y] = obj;
                 totalPellets++;
+                obj.GetComponent<Tile>().consumed = false;
+                obj.GetComponent<SpriteRenderer>().enabled = true;
             }
 
             if (obj.transform.parent != null && (obj.transform.parent.gameObject.name.Equals("Nodes"))) // Only consider game objects that are movement nodes.
@@ -62,20 +63,33 @@ public class GameBoard : MonoBehaviour
         }
 
         lives = GameObject.FindGameObjectsWithTag("Life");
-        InitialiseLevels();
+
+        if (level == 1)
+        {
+            Initialise();
+        }
+
+        startDeath = false;
+        shouldBlink = false;
+        blinkIntervalTimer = 0;
+        bonusItem = null;
+        didSpawnBonusItem1 = false;
+        didSpawnBonusItem2 = false;
 
         StartGame();
 	}
 
-    static void InitialiseLevels()
+    static void Initialise()
     {
+        AudioEngine.Start();
+
         levels = new Level[8];
 
-        levels[0] = new Level(0.57f, 0.50f, 12f, 0.30f, 1.2f, 0f, 0f, 4f, 8f, 7f, 7f, 5f, 5f, 20f);
-        levels[1] = new Level(0.62f, 0.55f, 10f, 0.35f, 1.4f, 0f, 0f, 4f, 8f, 7f, 6f, 5f, 5f, 20f);
-        levels[2] = new Level(0.67f, 0.60f, 08f, 0.40f, 1.5f, 0f, 0f, 3f, 7f, 6f, 6f, 5f, 4f, 20f);
-        levels[3] = new Level(0.72f, 0.65f, 08f, 0.45f, 1.6f, 0f, 0f, 3f, 6f, 5f, 5f, 5f, 4f, 20f);
-        levels[4] = new Level(0.80f, 0.75f, 06f, 0.50f, 1.7f, 0f, 0f, 2f, 5f, 5f, 5f, 4f, 4f, 20f);
+        levels[0] = new Level(1.57f, 0.50f, 12f, 0.30f, 1.2f, 0f, 0f, 4f, 8f, 7f, 7f, 5f, 5f, 10f);
+        levels[1] = new Level(1.62f, 0.55f, 10f, 0.35f, 1.4f, 0f, 0f, 4f, 8f, 7f, 6f, 5f, 5f, 12f);
+        levels[2] = new Level(1.67f, 0.60f, 08f, 0.40f, 1.5f, 0f, 0f, 3f, 7f, 6f, 6f, 5f, 4f, 14f);
+        levels[3] = new Level(1.72f, 0.65f, 08f, 0.45f, 1.6f, 0f, 0f, 3f, 6f, 5f, 5f, 5f, 4f, 16f);
+        levels[4] = new Level(0.80f, 0.75f, 06f, 0.50f, 1.7f, 0f, 0f, 2f, 5f, 5f, 5f, 4f, 4f, 18f);
         levels[5] = new Level(0.90f, 0.85f, 06f, 0.60f, 1.8f, 0f, 0f, 2f, 4f, 5f, 4f, 3f, 3f, 20f);
         levels[6] = new Level(1.00f, 0.95f, 04f, 0.70f, 1.9f, 0f, 0f, 1f, 3f, 4f, 4f, 2f, 2f, 20f);
         levels[7] = new Level(1.20f, 1.20f, 04f, 0.80f, 2.0f, 0f, 0f, 1f, 2f, 0f, 0f, 0f, 0f, 20f);
@@ -103,7 +117,9 @@ public class GameBoard : MonoBehaviour
         pacMan.GetComponent<Animator>().enabled = false;
         pacMan.GetComponent<PacmanController>().canMove = false;
 
-        StartCoroutine(ShowObjectsAfter(2.0f));
+        float musicDelay = (60f / (float)AudioEngine.levelMusic[0].GetComponent<MusicSource>().BPM) * 2;
+
+        StartCoroutine(ShowObjectsAfter(musicDelay));
     }
 
     IEnumerator ShowObjectsAfter(float delay)
@@ -115,15 +131,19 @@ public class GameBoard : MonoBehaviour
         foreach (GameObject ghost in ghosts)
         {
             ghost.GetComponent<SpriteRenderer>().enabled = true;
+            ghost.GetComponent<Animator>().enabled = true;
         }
 
         GameObject pacMan = GameObject.Find("Pacman");
 
         pacMan.GetComponent<SpriteRenderer>().enabled = true;
+        pacMan.GetComponent<Animator>().enabled = true;
 
         readyText.GetComponent<Text>().enabled = true;
 
-        StartCoroutine(StartGameAfter(2.0f));
+        float musicDelay = (60f / (float)AudioEngine.levelMusic[0].GetComponent<MusicSource>().BPM) * 2;
+
+        StartCoroutine(StartGameAfter(musicDelay));
     }
 
     IEnumerator StartGameAfter(float delay)
@@ -134,13 +154,11 @@ public class GameBoard : MonoBehaviour
 
         foreach (GameObject ghost in ghosts)
         {
-            ghost.GetComponent<Animator>().enabled = true;
             ghost.GetComponent<GhostController>().canMove = true;
         }
 
         GameObject pacMan = GameObject.Find("Pacman");
 
-        pacMan.GetComponent<Animator>().enabled = true;
         pacMan.GetComponent<PacmanController>().canMove = true;
 
         readyText.GetComponent<Text>().enabled = false;
@@ -219,7 +237,7 @@ public class GameBoard : MonoBehaviour
 
         pacMan.GetComponent<SpriteRenderer>().enabled = false;
 
-        if (pacmanLives <= 0)
+        if (Lives.pacmanLives <= 0)
         {
             readyText.GetComponent<Text>().text = "GAME OVER";
             readyText.GetComponent<Text>().color = new Color(153f / 255f, 0, 0);
@@ -291,7 +309,9 @@ public class GameBoard : MonoBehaviour
     {
         if (pelletsConsumed >= pelletsInLevel)
         {
-            StartCoroutine(ProcessWin(1f));
+            pelletsConsumed = 0;
+            float delay = AudioEngine.Transition();
+            StartCoroutine(ProcessWin(delay));
         }
         else if (pelletsConsumed >= 70 && pelletsConsumed < 170 && !didSpawnBonusItem1)
         {
@@ -321,7 +341,9 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
-        StartCoroutine(BlinkBoard(2f));
+        blinkInterval = (60f / (float)AudioEngine.transitions[level - 1].GetComponent<MusicSource>().BPM);
+
+        StartCoroutine(BlinkBoard(blinkInterval * 4));
     }
 
     IEnumerator BlinkBoard(float delay)
@@ -340,6 +362,7 @@ public class GameBoard : MonoBehaviour
 
         yield return new WaitForSeconds(delay);
 
+        GameObject.Find("Maze").GetComponent<SpriteRenderer>().sprite = mazeBlue;
         shouldBlink = false;
 
         NextLevel();
@@ -373,7 +396,18 @@ public class GameBoard : MonoBehaviour
     private void NextLevel()
     {
         level++;
-        SceneManager.LoadScene("Game");
+        AudioEngine.UpdateLevel();
+        Start();
+
+        GameObject pacMan = GameObject.Find("Pacman");
+        pacMan.GetComponent<PacmanController>().Restart();
+
+        GameObject[] ghosts = GameObject.FindGameObjectsWithTag("Ghost");
+
+        foreach (GameObject ghost in ghosts)
+        {
+            ghost.GetComponent<GhostController>().Restart();
+        }
     }
 
     // Adds a ghost score popup at the given location.

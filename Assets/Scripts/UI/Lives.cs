@@ -7,10 +7,13 @@ public class Lives : MonoBehaviour
 {
     public enum LivesID { LIFE1 = 1, LIFE2 = 2, LIFE3 = 3 };
     public LivesID life;
+    
+    public const int defaultLives = 3;
+    public static int pacmanLives = defaultLives;
 
     public void UpdateLives()
     {
-        if (GameBoard.pacmanLives < (int)life)
+        if (pacmanLives < (int)life)
         {
             this.GetComponent<Image>().enabled = false;
         }
@@ -22,18 +25,18 @@ public class Lives : MonoBehaviour
 
     public static void AddALife()
     {
-        if (GameBoard.pacmanLives < 3)
+        if (pacmanLives < 3)
         {
-            GameBoard.pacmanLives++;
+            pacmanLives++;
         }
     }
     public static void LoseALife()
     {
-        GameBoard.pacmanLives--;
+        pacmanLives--;
     }
 
     public static void ResetLives()
     {
-        GameBoard.pacmanLives = GameBoard.defaultLives;
+        pacmanLives = defaultLives;
     }
 }

@@ -13,13 +13,11 @@
     <TargetFrameworkIdentifier>.NETFramework</TargetFrameworkIdentifier>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <TargetFrameworkProfile>Unity Subset v3.5</TargetFrameworkProfile>
-    <CompilerResponseFile>
-    </CompilerResponseFile>
+    <CompilerResponseFile></CompilerResponseFile>
     <UnityProjectType>Game:1</UnityProjectType>
     <UnityBuildTarget>StandaloneWindows64:19</UnityBuildTarget>
     <UnityVersion>2017.3.0f3</UnityVersion>
-    <RootNamespace>
-    </RootNamespace>
+    <RootNamespace></RootNamespace>
     <LangVersion>4</LangVersion>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
@@ -289,11 +287,13 @@
   <ItemGroup>
     <Compile Include="Assets\Scripts\Game\AIDebug.cs" />
     <Compile Include="Assets\Scripts\Game\AnimationController.cs" />
+    <Compile Include="Assets\Scripts\Game\AudioEngine.cs" />
     <Compile Include="Assets\Scripts\Game\BonusItem.cs" />
-    <Compile Include="Assets\Scripts\Game\Level.cs" />
     <Compile Include="Assets\Scripts\Game\GameBoard.cs" />
     <Compile Include="Assets\Scripts\Game\GhostController.cs" />
     <Compile Include="Assets\Scripts\Game\HighScore.cs" />
+    <Compile Include="Assets\Scripts\Game\Level.cs" />
+    <Compile Include="Assets\Scripts\Game\MusicSource.cs" />
     <Compile Include="Assets\Scripts\Game\Node.cs" />
     <Compile Include="Assets\Scripts\Game\PacmanController.cs" />
     <Compile Include="Assets\Scripts\Game\Tile.cs" />

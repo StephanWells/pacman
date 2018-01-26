@@ -27,10 +27,11 @@ public class Tile : MonoBehaviour
             if (isDot || isPowerPill)
             {
                 this.GetComponent<SpriteRenderer>().enabled = false;
-                gameBoard.pelletsConsumed++;
+                GameBoard.pelletsConsumed++;
             }
             else if (isBonusItem)
             {
+                AudioEngine.PlayConsume();
                 StartCoroutine(Pause(1.0f));
             }
         }

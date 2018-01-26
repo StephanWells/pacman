@@ -11928,8 +11928,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78fac94730b78194f8d2db2bc818dca1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  totalPellets: 0
-  pelletsConsumed: 0
   mazeBlue: {fileID: 21300004, guid: 103dc84690c60ad4e9e891f948377d29, type: 3}
   mazeWhite: {fileID: 21300000, guid: 68ffcdb506c3cc34da833d01d94f157e, type: 3}
   readyText: {fileID: 661601152}
@@ -24482,6 +24480,46 @@ Prefab:
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: c813caee94f6ab3468b95c0bd4389e0a, type: 2}
   m_IsPrefabParent: 0
+--- !u!1 &2088352843
+GameObject:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  serializedVersion: 5
+  m_Component:
+  - component: {fileID: 2088352845}
+  - component: {fileID: 2088352844}
+  m_Layer: 0
+  m_Name: Audio
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &2088352844
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2088352843}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 009a0f070c769fe46a5cd4bed915e8d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &2088352845
+Transform:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 2088352843}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 10
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2091960623 stripped
 GameObject:
   m_PrefabParentObject: {fileID: 1074252632631448, guid: c813caee94f6ab3468b95c0bd4389e0a,

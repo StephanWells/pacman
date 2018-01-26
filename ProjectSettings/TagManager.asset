@@ -8,6 +8,10 @@ TagManager:
   - UI
   - Life
   - GhostScore
+  - TransitionMusic
+  - L1Music
+  - L2Music
+  - L3Music
   layers:
   - Default
   - TransparentFX

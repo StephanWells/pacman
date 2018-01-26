@@ -48,7 +48,7 @@ public class GhostController : MonoBehaviour
         gameBoard = GameObject.Find("GameBoard").GetComponent<GameBoard>();
         animator = this.GetComponent<AnimationController>();
 
-        SetDifficulty(GameBoard.level);
+        SetDifficulty();
 
         currentMode = Mode.IDLE;
         ghostState = AnimationController.State.STILL;
@@ -58,9 +58,9 @@ public class GhostController : MonoBehaviour
         targetNode = ChooseNextNode();
     }
 
-    private void SetDifficulty(int level)
+    private void SetDifficulty()
     {
-        Level currentLevel = GameBoard.levels[level - 1];
+        Level currentLevel = GameBoard.levels[GameBoard.level - 1];
 
         ghostSpeed = currentLevel.GetGhostSpeed();
         frightenedTime = currentLevel.GetGhostFrightenedTime();
@@ -82,6 +82,7 @@ public class GhostController : MonoBehaviour
 
     public void Restart()
     {
+        SetDifficulty();
         transform.position = startingPosition.transform.position;
         modeChangeTimer = 0;
         frightenedTimer = 0;
@@ -93,6 +94,8 @@ public class GhostController : MonoBehaviour
         ghostState = AnimationController.State.RECOVERED;
         animator.SetAnimatorState(ghostState);
         ghostState = AnimationController.State.STILL;
+        animator.SetAnimatorState(ghostState);
+        animator.SetAnimatorDirection(Vector2.up);
 
         currentNode = startingPosition;
         previousNode = currentNode;
@@ -370,6 +373,7 @@ public class GhostController : MonoBehaviour
 
     void Consume()
     {
+        AudioEngine.PlayConsume();
         consumedGhosts++;
         StartCoroutine(Pause(1.0f));
         Score.Ghost(consumedGhosts);

@@ -29,7 +29,7 @@ public class PacmanController : MonoBehaviour
         ghosts[2] = GameObject.Find("Inky");
         ghosts[3] = GameObject.Find("Clyde");
 
-        SetDifficulty(GameBoard.level);
+        SetDifficulty();
 
         playerDirection = Vector2.right;
         playerState = AnimationController.State.MOVING;
@@ -37,20 +37,26 @@ public class PacmanController : MonoBehaviour
         ChangePosition(playerDirection);
     }
 
-    private void SetDifficulty(int level)
+    private void SetDifficulty()
     {
-        Level currentLevel = GameBoard.levels[level - 1];
+        Level currentLevel = GameBoard.levels[GameBoard.level - 1];
 
         playerSpeed = currentLevel.GetPacmanSpeed();
     }
 
     public void Restart()
     {
+        SetDifficulty();
+
         this.transform.position = startingPosition.transform.position;
+
         playerDirection = Vector2.right;
         nextDirection = Vector2.right;
+        animator.SetAnimatorDirection(playerDirection);
+
         playerState = AnimationController.State.ALIVE;
-        playerState = AnimationController.State.MOVING;
+        animator.SetAnimatorState(playerState);
+
         currentNode = startingPosition;
         ChangePosition(playerDirection);
     }
@@ -88,6 +94,13 @@ public class PacmanController : MonoBehaviour
         {
             ChangePosition(Vector2.down);
             playerState = AnimationController.State.MOVING;
+        }
+        else if (Input.GetKeyDown(KeyCode.C))
+        {
+            foreach (GameObject ghost in ghosts)
+            {
+                ghost.GetComponent<GhostController>().canMove = !ghost.GetComponent<GhostController>().canMove;
+            }
         }
     }
 
