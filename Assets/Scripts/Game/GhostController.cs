@@ -72,16 +72,16 @@ public class GhostController : MonoBehaviour
         modes = currentLevel.GetDefaultGhostModes();
         timers = currentLevel.GetGhostTimers(ghost);
 
-        // Scatter behaviour timers.
-        timers[1] = 7; modes[1] = Mode.SCATTER;
-        timers[3] = 7; modes[3] = Mode.SCATTER;
-        timers[5] = 5; modes[5] = Mode.SCATTER;
-        timers[7] = 5; modes[7] = Mode.SCATTER;
+        //// Scatter behaviour timers.
+        //timers[1] = timers[0]; modes[1] = Mode.SCATTER;
+        //timers[3] = 7; modes[3] = Mode.SCATTER;
+        //timers[5] = 5; modes[5] = Mode.SCATTER;
+        //timers[7] = 5; modes[7] = Mode.SCATTER;
 
-        // Chase behaviour timers.
-        timers[2] = 20; modes[2] = Mode.CHASE;
-        timers[4] = 20; modes[4] = Mode.CHASE;
-        timers[6] = 20; modes[6] = Mode.CHASE;   
+        //// Chase behaviour timers.
+        //timers[2] = 20; modes[2] = Mode.CHASE;
+        //timers[4] = 20; modes[4] = Mode.CHASE;
+        //timers[6] = 20; modes[6] = Mode.CHASE;   
     }
 
     // Resets all ghost variables.

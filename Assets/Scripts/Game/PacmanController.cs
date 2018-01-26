@@ -97,13 +97,18 @@ public class PacmanController : MonoBehaviour
             ChangePosition(Vector2.down);
             playerState = AnimationController.State.MOVING;
         }
-        else if (Input.GetKeyDown(KeyCode.C))
+        // Cheating!
+        /*else if (Input.GetKeyDown(KeyCode.C))
         {
             foreach (GameObject ghost in ghosts)
             {
                 ghost.GetComponent<GhostController>().canMove = !ghost.GetComponent<GhostController>().canMove;
             }
-        }
+
+            playerSpeed = playerSpeed == 1.5f ? GameBoard.levels[GameBoard.level - 1].GetPacmanSpeed() : 1.5f;
+
+            Lives.AddALife();
+        }*/
     }
 
     // Updates the player's next direction, and make it the player's current direction if it's valid.

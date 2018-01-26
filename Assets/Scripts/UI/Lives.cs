@@ -8,7 +8,7 @@ public class Lives : MonoBehaviour
     public enum LivesID { LIFE1 = 1, LIFE2 = 2, LIFE3 = 3 };
     public LivesID life;
     
-    public const int defaultLives = 20;
+    public const int defaultLives = 3;
     public static int pacmanLives = defaultLives;
     static GameObject[] lives;
 

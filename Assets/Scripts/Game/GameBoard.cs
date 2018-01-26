@@ -41,6 +41,7 @@ public class GameBoard : MonoBehaviour
     {
         Object[] objects = GameObject.FindObjectsOfType(typeof(GameObject));
         totalPellets = 0;
+        pelletsConsumed = 0;
 
         foreach (GameObject obj in objects)
         {
@@ -90,14 +91,14 @@ public class GameBoard : MonoBehaviour
 
         levels = new Level[8];
 
-        levels[0] = new Level(1.57f, 0.50f, 12f, 0.30f, 1.2f, 0f, 0f, 4f, 8f, 7f, 7f, 5f, 5f, 10f);
-        levels[1] = new Level(1.62f, 0.55f, 10f, 0.35f, 1.4f, 0f, 0f, 4f, 8f, 7f, 6f, 5f, 5f, 12f);
-        levels[2] = new Level(1.67f, 0.60f, 08f, 0.40f, 1.5f, 0f, 0f, 3f, 7f, 6f, 6f, 5f, 4f, 14f);
-        levels[3] = new Level(1.72f, 0.65f, 08f, 0.45f, 1.6f, 0f, 0f, 3f, 6f, 5f, 5f, 5f, 4f, 16f);
-        levels[4] = new Level(0.80f, 0.75f, 06f, 0.50f, 1.7f, 0f, 0f, 2f, 5f, 5f, 5f, 4f, 4f, 18f);
-        levels[5] = new Level(0.90f, 0.85f, 06f, 0.60f, 1.8f, 0f, 0f, 2f, 4f, 5f, 4f, 3f, 3f, 20f);
-        levels[6] = new Level(1.00f, 0.95f, 04f, 0.70f, 1.9f, 0f, 0f, 1f, 3f, 4f, 4f, 2f, 2f, 20f);
-        levels[7] = new Level(1.20f, 1.20f, 04f, 0.80f, 2.0f, 0f, 0f, 1f, 2f, 0f, 0f, 0f, 0f, 20f);
+        levels[0] = new Level(0.60f, 0.50f, 12f, 0.30f, 1.2f, 0f, 0f, 4f, 8f, 7f, 7f, 5f, 5f, 10f);
+        levels[1] = new Level(0.70f, 0.55f, 08f, 0.35f, 1.4f, 0f, 0f, 4f, 8f, 7f, 6f, 5f, 5f, 12f);
+        levels[2] = new Level(0.80f, 0.60f, 06f, 0.40f, 1.5f, 0f, 0f, 3f, 7f, 6f, 6f, 5f, 4f, 14f);
+        levels[3] = new Level(0.90f, 0.65f, 05f, 0.45f, 1.6f, 0f, 0f, 3f, 6f, 5f, 5f, 5f, 4f, 16f);
+        levels[4] = new Level(1.00f, 0.75f, 04f, 0.50f, 1.7f, 0f, 0f, 2f, 5f, 5f, 5f, 4f, 4f, 18f);
+        levels[5] = new Level(1.10f, 0.85f, 03f, 0.55f, 1.8f, 0f, 0f, 2f, 4f, 5f, 4f, 3f, 3f, 20f);
+        levels[6] = new Level(1.20f, 0.95f, 03f, 0.60f, 1.9f, 0f, 0f, 1f, 3f, 4f, 4f, 2f, 2f, 20f);
+        levels[7] = new Level(1.30f, 1.10f, 03f, 0.65f, 2.0f, 0f, 0f, 1f, 2f, 0f, 0f, 0f, 0f, 20f);
     }
 
     public void StartGame()

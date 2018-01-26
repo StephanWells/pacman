@@ -199,7 +199,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 55159ceb58dc5264fbc5ef233530e0e0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  blinkTimer: 1
+  blinkTimer: 1.09
   colour: {r: 1, g: 0, b: 0, a: 1}
 --- !u!1 &132285614
 GameObject:

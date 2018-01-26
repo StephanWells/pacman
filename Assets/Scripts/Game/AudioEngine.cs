@@ -662,10 +662,6 @@ public class AudioEngine : MonoBehaviour
                 levelDeath = LoadL1ToL4Death();
                 level = GameBoard.level;
 
-                varTimer = 0 - (nextSong.clip.length - nextSong.time);
-                varTimer = 0;
-                varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
-
                 levelCount = 0;
             break;
 
@@ -679,10 +675,7 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL5FdMusic();
                 level = GameBoard.level;
 
-                varTimer = 0 - (nextSong.clip.length - nextSong.time);
-                varTimer = 0;
-                varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
-            break;
+                break;
 
             case 6:
                 foreach (AudioSource audio in levelMusic)
@@ -694,10 +687,7 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL6FdMusic();
                 level = GameBoard.level;
 
-                varTimer = 0 - (nextSong.clip.length - nextSong.time);
-                varTimer = 0;
-                varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
-            break;
+                break;
 
             case 7:
                 foreach (AudioSource audio in levelMusic)
@@ -709,10 +699,7 @@ public class AudioEngine : MonoBehaviour
                 levelFdMusic = LoadL7FdMusic();
                 level = GameBoard.level;
 
-                varTimer = 0 - (nextSong.clip.length - nextSong.time);
-                varTimer = 0;
-                varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
-            break;
+                break;
 
             case 8:
                 foreach (AudioSource audio in levelMusic)
@@ -723,10 +710,7 @@ public class AudioEngine : MonoBehaviour
                 levelMusic = LoadL8Music();
                 levelFdMusic = LoadL8FdMusic();
 
-                varTimer = 0 - (nextSong.clip.length - nextSong.time);
-                varTimer = 0;
-                varTime = levelMusic[levelCount].clip.length - variationPreparationTime;
-            break;
+                break;
         }
     }
 
@@ -745,14 +729,23 @@ public class AudioEngine : MonoBehaviour
         }
         else if (level > 4)
         {
-            startingPoint = 4 * levelMusic[levelCount].clip.length / levelMusic[levelCount].GetComponent<MusicSource>().bars; // (if we're in level 5 onwards, we want to start from bar 4)
+            startingPoint = 4 * levelMusic[levelCount].clip.length / levelMusic[levelCount].GetComponent<MusicSource>().bars; // (if we're in level 5 onwards, we want to start from bar 5)
         }
         else
         {
             startingPoint = 0; // (if we're in levels 1/2/3, we want to start from the beginning of the clip)
         }
 
+        if (variations)
+        {
+            varTimer = 0 - (nextSong.clip.length - nextSong.time);
+            varTime = levelMusic[levelCount].clip.length - variationPreparationTime - startingPoint;
+
+            Debug.Log("Setting the varTimer to " + varTimer + " and the varTime to " + varTime + ".");
+        }
+        
         SwapSongAfter(levelMusic[levelCount], currentSong.GetComponent<MusicSource>().bars, startingPoint); // Swap to the level's first song.
+
         transitioning = false;
     }
 
@@ -783,23 +776,24 @@ public class AudioEngine : MonoBehaviour
         if (!transitioning)
         {
             varTimer += Time.fixedDeltaTime; // Add the time of the last frame to the variation timer.
-        }
 
-        if (varTimer >= varTime) // Is it time to schedule a new variation?
-        {
-            Debug.Log("Variation timer threshold reached!");
-
-            varTimer = 0 - variationPreparationTime; // Reset the variation timer.
-            int rand = Random.Range(0, levelMusic.Length); // Choose a new random index.
-
-            if (rand == levelCount) // If the index is the same as the one we currently have.
+            if (varTimer >= varTime) // Is it time to schedule a new variation?
             {
-                rand = rand < levelMusic.Length - 1 ? rand + 1 : rand - 1; // Change it.
-            }
+                int rand = Random.Range(0, levelMusic.Length); // Choose a new random index.
 
-            SwapSongAfter(levelMusic[rand], levelMusic[levelCount].GetComponent<MusicSource>().bars, 0); // Schedule the new variation.
-            levelCount = rand; // Set the current index to be the new one.
-            varTime = levelMusic[rand].clip.length - variationPreparationTime; // Set the variation timer threshold to be as long as the next track (minus a preparation time).
+                varTimer = 0 - variationPreparationTime; // Reset the variation timer.
+                varTime = levelMusic[rand].clip.length - variationPreparationTime; // Set the variation timer threshold to be as long as the next track (minus a preparation time).
+
+                Debug.Log("Variation timer threshold reached! Setting varTimer to " + varTimer + " and varTime to " + varTime + ".");
+
+                if (rand == levelCount) // If the index is the same as the one we currently have.
+                {
+                    rand = rand < levelMusic.Length - 1 ? rand + 1 : rand - 1; // Change it.
+                }
+
+                SwapSongAfter(levelMusic[rand], levelMusic[levelCount].GetComponent<MusicSource>().bars, 0); // Schedule the new variation.
+                levelCount = rand; // Set the current index to be the new one.
+            }
         }
     }
 
@@ -894,11 +888,9 @@ public class AudioEngine : MonoBehaviour
 
         stopTime = currentSong.GetComponent<MusicSource>().GetTimeUntilBarsEnd(bars); // Set how long the program will need to wait till we swap songs.
 
-        Debug.Log("Swapping in " + stopTime + " seconds.");
-
         newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
         ///*StartCoroutine*/Timing.RunCoroutine(StartSongAfter(newSong, stopTime));
-        Debug.Log(newSong.name + " is scheduled.");
+        Debug.Log("Swapping to " + newSong.name + " in " + stopTime + ".");
         newSong.time = startingPoint; // Set the starting point of the scheduled song.
 
         if (currentSong.GetComponent<MusicSource>().isTransition)
@@ -919,7 +911,7 @@ public class AudioEngine : MonoBehaviour
         if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
         {
             currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
-            Debug.Log("Stopped " + songIn.name);
+            Debug.Log("Stopped " + songIn.name + ". Current song: " + currentSong);
             /*StartCoroutine*/Timing.RunCoroutine(FadeMusicOut(songIn, 0.2f)); // Stop the song.
         }
     }
@@ -931,7 +923,7 @@ public class AudioEngine : MonoBehaviour
         if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
         {
             currentSong = nextSong; // The scheduled track is now playing and can be stored in the currentSong variable.
-            Debug.Log("Stopped " + songIn.name);
+            Debug.Log("(Transition) Stopped " + songIn.name + ". Current song: " + currentSong);
         }
     }
 
