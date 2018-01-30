@@ -97,6 +97,11 @@ public class PacmanController : MonoBehaviour
             ChangePosition(Vector2.down);
             playerState = AnimationController.State.MOVING;
         }
+        // Restart.
+        /*else if (Input.GetKeyDown(KeyCode.R))
+        {
+            StartCoroutine(gameBoard.ProcessGameOver(1f));
+        }*/
         // Cheating!
         /*else if (Input.GetKeyDown(KeyCode.C))
         {

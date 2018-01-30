@@ -888,8 +888,8 @@ public class AudioEngine : MonoBehaviour
 
         stopTime = currentSong.GetComponent<MusicSource>().GetTimeUntilBarsEnd(bars); // Set how long the program will need to wait till we swap songs.
 
-        newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
-        ///*StartCoroutine*/Timing.RunCoroutine(StartSongAfter(newSong, stopTime));
+        //newSong.PlayScheduled(AudioSettings.dspTime + stopTime); // Schedule the song.
+        /*StartCoroutine*/Timing.RunCoroutine(StartSongAfter(newSong, stopTime));
         Debug.Log("Swapping to " + newSong.name + " in " + stopTime + ".");
         newSong.time = startingPoint; // Set the starting point of the scheduled song.
 
@@ -934,7 +934,7 @@ public class AudioEngine : MonoBehaviour
         if (songIn != null) // If the song we wanted to stop hasn't been destroyed with the level change.
         {
             Debug.Log("Started " + songIn.name);
-            /*StartCoroutine*/Timing.RunCoroutine(FadeMusicIn(songIn, 0.1f)); // Stop the song.
+            /*StartCoroutine*/Timing.RunCoroutine(FadeMusicIn(songIn, 0.02f)); // Stop the song.
         }
     }
 

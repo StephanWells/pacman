@@ -259,7 +259,7 @@ public class GameBoard : MonoBehaviour
         }
     }
 
-    IEnumerator ProcessGameOver(float delay)
+    public IEnumerator ProcessGameOver(float delay)
     {
         yield return new WaitForSeconds(delay);
 
